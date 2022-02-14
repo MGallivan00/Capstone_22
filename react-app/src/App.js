@@ -4,6 +4,8 @@ import './App.css';
 import { ListNode } from "./ListNode";
 import { useState } from 'react';
 import { Container, Button } from 'react-floating-action-button'
+import { Menu, MenuItem, MenuButton, SubMenu } from '@szhsin/react-menu';
+import '@szhsin/react-menu/dist/index.css';
 
 function App() {
 
@@ -15,12 +17,24 @@ function App() {
             setNode([...nodes, nodeNames[0]]); //this will become the metadata
     }
   return (
-    <div className="App">
+      <div className="App">
+          <div className="Menu">
+              <Menu menuButton={
+                  <MenuButton className="btn-primary">Menu</MenuButton>}>
+                  <MenuItem>Load</MenuItem>
+                  <SubMenu label="Preset">
+                      <MenuItem>preset1.html</MenuItem>
+                      <MenuItem>preset2.js</MenuItem>
+                  </SubMenu>
+                  <MenuItem>Save</MenuItem>
+                  <MenuItem>Export </MenuItem>
+              </Menu>
+          </div>
       <header className="App-header">
           <Container>
               <Button
                   tooltip="New Node"
-                  icon="fas fa-plus"
+                  icon={"plus"}
                   styles={{backgroundColor: "#00B1E1", color: "#FFFFFF"}} onClick={addComponent}
               />
           </Container>
