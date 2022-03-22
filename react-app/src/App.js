@@ -88,6 +88,11 @@ function App() {
         document.getElementById("form").reset();
     }
 
+    function toJSON() {
+        var JsonObject = JSON.parse(JSON.stringify(storage));
+        console.log(JsonObject);
+    }
+
     function openForm() {
         document.getElementById("popup").style.display = "block";
     }
