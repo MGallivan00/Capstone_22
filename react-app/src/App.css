@@ -1,76 +1,160 @@
-.App {
-  text-align: center;
-  background-image: url("img/background.jpg");
-  background-size: contain;
-  background-repeat: repeat-y;
-  background-color: #1b2034;
+:root {
+    --interfacesBarWidthPx: 100px;
+    --canvasWidthVw: 100%;
+    --canvasHeightVh: 100%;
+    background: #1b2034;
 }
 
-.PlaySpace {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.fixedBoxStyle {
+    border: 1px #999 solid;
+    border-radius: 10px;
+    text-align: center;
+    position: static;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+}
+.fixedBoxStyle:hover {
+    background: rgb(230, 230, 230);
 }
 
-.Node {
-  cursor: pointer;
-  color: white;
-  user-select: none;
-  font-size: 15px;
-  font-family: Arial, Helvetica, sans-serif;
-  text-align: center;
-  background-color: #00B1E1;
-  border-radius: 50%;
-  padding: 10px;
-  margin: 10px;
+.interfacesBarStyle {
+    /* position: relative; */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 100%;
+    width: var(--interfacesBarWidthPx);
+    border: solid black 1px;
+}
+
+.interfaceTitleStyle {
+    font-size: 15px;
+    color: black;
+    position: absolute;
+    margin-top: 5px;
+    top: 0;
+}
+
+.nodesContainer {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 div.Menu{
-  text-align: right;
-  font-family: Arial, Helvetica, sans-serif;
-  color:white;
-  padding: 8px;
-  position:-webkit-sticky;
-  position: sticky;
-  top: 20px;
+    text-align: right;
+    font-family: Arial, Helvetica, sans-serif;
+    /*color:white;*/
+    padding: 8px;
+    position:-webkit-sticky;
+    position: sticky;
+    top: 40px;
 }
-
 .btn-primary{
-  text-align: center;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: large;
-  color:white;
-  background-color: #00B1E1;
-  padding: 8px;
-  margin-right: 100px;
-  border-radius: 20%;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: large;
+    color:white;
+    background-color: #00B1E1;
+    padding: 8px;
+    margin-right: 100px;
+    border-radius: 20%;
 }
-
 
 /*code adapted from https://www.w3schools.com/howto/howto_js_popup_form.asp*/
 
 .form-popup {
-  display: none;
-  position: fixed;
-  border: 3px solid #f1f1f1;
-  z-index: 9;
+    display: none;
+    position: fixed;
+    border: 3px solid #f1f1f1;
+    z-index: 9;
 }
 
 .form-container {
-  max-width: 300px;
-  padding: 10px;
-  background-color: white;
-  color: black;
+    max-width: 300px;
+    padding: 10px;
+    background-color: white;
+    color: black;
 }
 
 .form-container input[type=text] {
-  width: 75%;
-  padding: 15px;
-  margin: 5px 0 22px 0;
-  border: none;
-  background: #f1f1f1;
+    width: 75%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    border: none;
+    background: #f1f1f1;
+}
+
+/*.titleStyle {*/
+/*    font-size: 40px;*/
+/*    margin: 20px 0 0 20px;*/
+/*}*/
+
+.canvasStyle {
+    display: flex;
+    position: relative;
+    width: var(--canvasWidthVw);
+    height: var(--canvasHeightVh);
+    color: black;
+    background-image: url("img/background.jpg");
+    background-size: contain;
+    background-repeat: repeat-y;
+    background-color: #1b2034;
+}
+
+.toolboxMenu {
+    width: 100px;
+    background: rgb(200, 200, 200);
+    text-align: center;
+}
+
+.toolboxTitle {
+    font-size: 20px;
+    height: 50px;
+}
+.toolboxContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 100%;
+}
+.node {
+    border: 1px black solid;
+    text-align: center;
+    border-radius: 50%;
+    background: #00B1E1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    margin: 10px;
+}
+
+.node {
+    height: 50px;
+}
+
+.switchIcon {
+    top: 0;
+    width: 50px;
+    height: 50px;
+}
+
+.iconContainer {
+    background: white;
+    border-color: #999;
+    border-style: solid;
+    border-width: 1px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 10px;
 }
