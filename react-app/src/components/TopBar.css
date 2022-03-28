@@ -1,0 +1,54 @@
+/* XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples */
+
+.topBarStyle {
+    display: flex;
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+    background: #1b2034;
+    padding: 0 20px;
+    transition: all 0.2s ease-out;
+    height: 90px;
+    align-items: center;
+    /* border: solid 1px black; */
+    /* z-index: 1; */
+    /* overflow-x: auto; */
+}
+
+.topBarLabel {
+    display: flex;
+    align-items: center;
+    border-radius: 30px;
+    background: white;
+    margin: 5px;
+}
+.topBarLabel:hover {
+    background: azure;
+}
+.topBarLabel:active {
+    background: deepskyblue;
+}
+
+.actionBubbles {
+    color: white;
+    display: flex;
+    align-items: center;
+    width: calc(100% - 200px);
+    justify-content: space-evenly;
+}
+
+.actionBubble {
+    background: #999;
+    border-radius: 20px;
+    height: 80%;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 5px;
+}
+.actionBubble:hover {
+    background: #00e1e1;
+}
+.actionBubble:active {
+    background: DeepSkyBlue;
+}
