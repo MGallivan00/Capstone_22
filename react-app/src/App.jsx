@@ -20,6 +20,7 @@ import {getAnalytics} from "firebase/analytics";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+/*
 const firebaseConfig = {
     apiKey: "AIzaSyALd8fTT_YORi0wwJ7bC_7O347ssGlItvg",
     authDomain: "capstone-pique.firebaseapp.com",
@@ -34,10 +35,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const database = getDatabase();
+*/
 
 //example node for json - which is sorted by classification
 const rootNode = {name: 'root',
-    description: 'info',
+    description: 'desc',
     children: [],
     classification: "class"};
 
@@ -54,11 +56,9 @@ const TYPE = ["node"];
 const App = () => {
     // with reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
     // and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
-    let nodesArray = [];
-    if (window.sessionStorage.getItem('storeNode') != null) {
-        nodesArray = window.sessionStorage.getItem('storeNode').split(",");
-        console.log(nodesArray);
-    }
+    let nodeName = "";
+    let nodeDesc = "";
+    let nodeType = "No Classification Set";
 
     const [interfaces, setInterfaces] = useState([]);
 
@@ -79,36 +79,26 @@ const App = () => {
         return [...nodes, ...interfaces].map((b) => b.id).includes(id);
     };
 
-    function handleDropDynamic() {
-        // TODO: Finish merging the drop dynamic and the node information form
-        // closeForm();
-        // const elements = document.getElementById("form").elements;
-        // console.log(elements[0].value + "; " + elements[1].value + "; "+ elements[2].value + "; ");
-        // let n = {name: elements[0], description: elements[1].value, children: [], classification: "class"}
-        // storage.push(n);
-        // console.log(storage);
-        // nodesArray.unshift(elements[0].value);
-        // const newName =  elements[0].value;
-        // let object = TYPE[0];
-        // if (newName) {
-        //     let newNode = {id: newName, x: 400, y: 400, shape: object};
-        //     setNodes([...nodes, newNode]);
-        // }
-        // console.log(nodes.toString());
-        // nodesArray.forEach(setPosition);
-        // // window.sessionStorage.setItem('storeNode', nodesArray.toString());
-        // window.sessionStorage.setItem('storeNode', nodes.toString());
-        // document.getElementById("form").reset();
+    // from https://www.youtube.com/watch?v=Px4Lm8NixtE
+    function getName(prop){ nodeName = prop.target.value; }
 
-        /* Old drop dynamic code */
+    function getDesc(prop){ nodeDesc = prop.target.value; }
+
+    function getType(prop){ nodeType = prop.value; }
+
+    function handleDropDynamic() {
+        closeForm();
         let l = nodes.length;
         let object = TYPE[0];
         while (checkExistence("node" + l)) l++;
-        const newName = prompt("Enter node name: ", "node" + l)
-        if (newName) {
-            let newNode = {id: newName, x: 500, y: 500, shape: object};
-            setNodes([...nodes, newNode]);
+        if(nodeName === ""){
+            nodeName = "node" + l;
         }
+        let newNode = {id: nodeName, desc: nodeDesc, type: nodeType, children: [], x: 500, y: 500, shape: object};
+        setNodes([...nodes, newNode]);
+        storage.push(newNode);
+        console.log(nodeName + "; " + nodeDesc + "; "+ nodeType + "; ");
+        console.log(nodes, newNode);
     }
 
     function setPosition(nodeEntry) {
@@ -126,19 +116,6 @@ const App = () => {
             }
         }
     }
-    function addComponent() {
-        closeForm();
-        const elements = document.getElementById("form").elements;
-        console.log(elements[0].value + "; " + elements[1].value + "; "+ elements[2].value + "; ");
-        let n = {name: elements[0], description: elements[1].value, children: [], classification: "class"}
-        storage.push(n);
-        console.log(storage);
-        nodesArray.unshift(elements[0].value);
-        console.log(nodesArray);
-        nodesArray.forEach(setPosition);
-        window.sessionStorage.setItem('storeNode', nodesArray.toString());
-        document.getElementById("form").reset();
-    }
 
     function toJSON() {
         var JsonObject = JSON.parse(JSON.stringify(storage));
@@ -151,9 +128,11 @@ const App = () => {
 
     function closeForm() {
         document.getElementById("popup").style.display = "none";
+        document.getElementById("inputName").value = "";
+        document.getElementById("inputDesc").value = "";
     }
 
-    function load_file() {
+    /*function load_file() {
         let name = window.prompt("Enter file name ");
         const test = ref(database, name + '/');
         return onValue(test), (snapshot) => {
@@ -168,7 +147,7 @@ const App = () => {
             name: name,
         });
     }
-
+*/
     const props = {
         interfaces,
         setInterfaces,
@@ -225,9 +204,9 @@ const App = () => {
                         id="nodesContainer"
                         className="nodesContainer"
                         onDragOver={(e) => e.preventDefault()}
-                        onDrop={handleDropDynamic}
+                        //onDrop={handleDropDynamic}
                         // TODO: Change how the drop dynamic is handled and have it open the add node form
-                        // onDrop={openForm}
+                        onDrop={openForm}
                     >
                         {/* Dropdown Node Options */}
                         <TopBar {...props} />
@@ -245,53 +224,40 @@ const App = () => {
                             />
                         ))}
 
-                        {/* Original Node Mapping */}
-                        {/*{nodesArray.map((item, i) => (<Node*/}
-                        {/*    key={i}*/}
-                        {/*    text={item}*/}
-                        {/*/>))}*/}
-
-                        {/* Add Node Button */}
-                        {/*<Container>*/}
-                        {/*    <Button*/}
-                        {/*        tooltip="New Node"*/}
-                        {/*        styles={{backgroundColor: "#00B1E1", color: "#FFFFFF"}} onClick={openForm}*/}
-                        {/*    />*/}
-                        {/*</Container>*/}
-
                         {/* Add Node Popup Menu */}
                         <div className="form-popup" id="popup">
-                            <form className="form-container" method="get" id="form">
+                            <div className="form-container" id="form">
                                 <h2>Input Node Info</h2>
                                 <b>Name</b>
                                 <input type="text"
                                        placeholder="Name"
-                                       name="name"/>
+                                       id="inputName"
+                                       onChange={getName}/>
                                 <b>Description</b>
                                 <input type="text"
                                        placeholder="Description"
-                                       name="info"/>
+                                       id="inputDesc"
+                                       onChange={getDesc}/>
                                 <b>Classification</b>
                                 {/* diagnostic, measures, product_factors, quality_aspects, tqi*/}
-                                <Select options={options} />
+                                <Select id="inputType" options={options} onChange={getType} />
                                 {/* Submission Button */}
                                 <Button
                                     tooltip="Submit"
-                                    // icon="fas fa-plus"
-                                    styles={{backgroundColor: "#04AA6D", color: "#FFFFFF"}} onClick={addComponent}
+                                    styles={{backgroundColor: "#04AA6D", color: "#FFFFFF"}} onClick={handleDropDynamic}
                                 />
-                            </form>
+                            </div>
                         </div>
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
                                 <MenuItem>Load</MenuItem>
-                                <SubMenu label="Preset">
+                                {/*<SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
                                 </SubMenu>
                                 <MenuItem onClick={write_file}>Save</MenuItem>
-                                <MenuItem>Export</MenuItem>
+                                <MenuItem>Export</MenuItem>*/}
                             </Menu>
                         </div>
                     </div>
