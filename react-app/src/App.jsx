@@ -8,6 +8,7 @@ import { Container, Button } from 'react-floating-action-button'
 import { Menu, MenuItem, MenuButton, SubMenu } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
 import Select from 'react-select' ; //https://react-select.com/home
+
 import {getDatabase, ref, set, get, snapshot, onValue, getDocs} from "firebase/database";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
@@ -58,7 +59,7 @@ const App = () => {
     // and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
     let nodeName = "";
     let nodeDesc = "";
-    let nodeType = "No Classification Set";
+    let nodeType = "other";
 
     const [interfaces, setInterfaces] = useState([]);
 
@@ -81,13 +82,10 @@ const App = () => {
 
     // from https://www.youtube.com/watch?v=Px4Lm8NixtE
     function getName(prop){ nodeName = prop.target.value; }
-
     function getDesc(prop){ nodeDesc = prop.target.value; }
-
     function getType(prop){ nodeType = prop.value; }
 
     function handleDropDynamic() {
-        closeForm();
         let l = nodes.length;
         let object = TYPE[0];
         while (checkExistence("node" + l)) l++;
@@ -99,27 +97,26 @@ const App = () => {
         storage.push(newNode);
         console.log(nodeName + "; " + nodeDesc + "; "+ nodeType + "; ");
         console.log(nodes, newNode);
+        closeForm();
     }
 
-    function setPosition(nodeEntry) {
-        if (document.getElementById(nodeEntry) != null) {
-            console.log(document.getElementById(nodeEntry));
-            document.getElementById(nodeEntry).style.position = 'absolute';
-            if (window.sessionStorage.getItem(nodeEntry) != null) {
-                var positions = window.sessionStorage.getItem(nodeEntry).split(",");
-                console.log(positions);
-                //console.log(positions[0]);
-                //console.log(positions[1]);
-                document.getElementById(nodeEntry).style.left = positions[0];
-                //console.log(document.getElementById(item).style.left);
-                document.getElementById(nodeEntry).style.top = positions[1];
-            }
-        }
+    function nameFile(){
+        let d = new Date();
+        let t = d + "_" + d.getHours() + "_" + d.getMinutes();
+        let fileName = window.prompt("Enter the filename: ", t)
+        toJSON(fileName);
     }
 
-    function toJSON() {
-        var JsonObject = JSON.parse(JSON.stringify(storage));
-        console.log(JsonObject);
+    function toJSON(prop) {
+        const data = new Blob([JSON.stringify(storage)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.download = (prop + ".json");
+        a.href = URL.createObjectURL(data);
+        a.addEventListener('click', (e) => {
+            setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
+        });
+        a.click();
+        window.alert("JSON data is save to " + prop + ".json");
     }
 
     function openForm() {
@@ -130,8 +127,11 @@ const App = () => {
         document.getElementById("popup").style.display = "none";
         document.getElementById("inputName").value = "";
         document.getElementById("inputDesc").value = "";
+        //i just don't know why it won't reset like inputName and Desc
+        //document.getElementsByTagName("Select").defaultValue = {value: "other", label: 'Other'};
     }
 
+    //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
     /*function load_file() {
         let name = window.prompt("Enter file name ");
         const test = ref(database, name + '/');
@@ -240,7 +240,8 @@ const App = () => {
                                        onChange={getDesc}/>
                                 <b>Classification</b>
                                 {/* diagnostic, measures, product_factors, quality_aspects, tqi*/}
-                                <Select id="inputType" options={options} onChange={getType} />
+                                {/*drop down messed up for showing values or resetting value*/}
+                                <Select id="inputType" options={options} value={"Other"} onChange={getType} />
                                 {/* Submission Button */}
                                 <Button
                                     tooltip="Submit"
@@ -248,10 +249,12 @@ const App = () => {
                                 />
                             </div>
                         </div>
+
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
                                 <MenuItem>Load</MenuItem>
+                                <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {/*<SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
