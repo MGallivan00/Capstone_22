@@ -38,12 +38,6 @@ const analytics = getAnalytics(app);
 const database = getDatabase();
 */
 
-//example node for json - which is sorted by classification
-const rootNode = {name: 'root',
-    description: 'desc',
-    children: [],
-    classification: "class"};
-
 const options = [{value:"diagnostics", label: 'Diagnostics'},
     {value:"measures", label: 'Measures'},
     {value:"product_factors", label: 'Product Factors'},
@@ -51,7 +45,6 @@ const options = [{value:"diagnostics", label: 'Diagnostics'},
     {value:"tqi", label: 'TQI'}];
 
 const storage = [];
-
 const TYPE = ["node"];
 
 const App = () => {
@@ -96,27 +89,60 @@ const App = () => {
         setNodes([...nodes, newNode]);
         storage.push(newNode);
         console.log(nodeName + "; " + nodeDesc + "; "+ nodeType + "; ");
-        console.log(nodes, newNode);
+        console.log(storage);
         closeForm();
     }
 
     function nameFile(){
         let d = new Date();
-        let t = d + "_" + d.getHours() + "_" + d.getMinutes();
+        let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t)
         toJSON(fileName);
     }
 
+    function findNode(node){
+        return (node.id === this);
+    }
+
+    function clean(arr){
+        let clean = [];
+        arr.sort();
+        let i = 0;
+        clean.push(arr[i]);
+        for (let j = 1; j < arr.length; j++){
+            if(arr[j] !== arr[i]){
+                clean.push(arr[j]);
+                i = j;
+            }
+        }
+        return clean;
+    }
+
+    //https://www.w3schools.com/jsref/jsref_foreach.asp
+    //can add children but not delete them
+    function addChildren(l){
+        let child = l.props.end;
+        let p = l.props.start;
+        let parent = storage.find(findNode, p);
+        console.log(parent.children);
+        parent.children.push(child);
+        parent.children = clean(parent.children);
+        console.log(storage);
+    }
+
     function toJSON(prop) {
+        lines.forEach(addChildren);
+        storage.sort((a, b) => (a.type > b.type) ? 1 : -1)
+
         const data = new Blob([JSON.stringify(storage)], {type: 'application/json'});
         const a = document.createElement('a');
-        a.download = (prop + ".json");
+        a.download = (prop + ".txt");
         a.href = URL.createObjectURL(data);
         a.addEventListener('click', (e) => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
         a.click();
-        window.alert("JSON data is save to " + prop + ".json");
+        window.alert("JSON data is save to " + prop + ".txt");
     }
 
     function openForm() {
