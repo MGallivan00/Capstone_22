@@ -21,7 +21,7 @@ import {getAnalytics} from "firebase/analytics";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-/*
+
 const firebaseConfig = {
     apiKey: "AIzaSyALd8fTT_YORi0wwJ7bC_7O347ssGlItvg",
     authDomain: "capstone-pique.firebaseapp.com",
@@ -36,7 +36,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const database = getDatabase();
-*/
+
 
 const options = [{value:"diagnostics", label: 'Diagnostics'},
     {value:"measures", label: 'Measures'},
@@ -189,7 +189,7 @@ const App = () => {
     }
 
     //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
-    /*function load_file() {
+    function load_file() {
         let name = window.prompt("Enter file name ");
         const test = ref(database, name + '/');
         return onValue(test), (snapshot) => {
@@ -204,7 +204,7 @@ const App = () => {
             name: name,
         });
     }
-*/
+
     const props = {
         interfaces,
         setInterfaces,
@@ -320,12 +320,11 @@ const App = () => {
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
                                 <MenuItem>Load</MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
-                                {/*<SubMenu label="Preset">
+                                {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
-                                </SubMenu>
-                                <MenuItem onClick={write_file}>Save</MenuItem>
-                                <MenuItem>Export</MenuItem>*/}
+                                </SubMenu><MenuItem onClick={write_file}>database</MenuItem>
+                                <MenuItem>Export</MenuItem></>}
                             </Menu>
                         </div>
                     </div>
