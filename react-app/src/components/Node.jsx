@@ -19,7 +19,6 @@ const Node = (props) => {
                 ...lines,
                 {
                     props: { start: props.selected.id, end: props.box.id },
-                    menuWindowOpened: false
                 }
             ]);
         } else if (props.actionState === "Remove Connections") {
@@ -37,7 +36,6 @@ const Node = (props) => {
         background = "#24bd57";
     } else if (
         (props.actionState === "Add Connections" &&
-            // props.sidePos !== "right" &&
             props.lines.filter(
                 (line) => line.root === props.selected.id && line.end === props.box.id
             ).length === 0) ||
