@@ -8,7 +8,7 @@ import { Menu, MenuItem, MenuButton, SubMenu } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
 
 
-/*import{getDatabase,ref, set, get, snapshot, onValue,getDocs} from "firebase/database";
+import{getDatabase,ref, set, get, snapshot, onValue,getDocs,child} from "firebase/database";
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -31,7 +31,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-const database=getDatabase();*/
+const database=getDatabase();
 
 function App(){
 
@@ -79,33 +79,71 @@ function App(){
             document.getElementById("popup").style.display="none";
         }
 
-        /*     function load_file(){
-                 var name=window.prompt("Enter file name ");
-                 const test = ref(database, name +'/');
-                 return onValue(test), (snapshot) =>{
-                     const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
-                 },
-                 {onlyOnce:true}
-             };
+        function load_file(){
+            var name=window.prompt("Enter file name ");
+            const test = ref(database, 'Saved/'+ name +'/');
+            return onValue(test),(snapshot) =>{
+                const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
+                },
+            {onlyOnce:true}
+        };
+        function load_bin(){
+            //const ref = database.ref('bin-Default');
+            //ref.on('value',(snapshot)=> {
+            //    console.log(snapshot.val());
+            //  }, (errorObject) => {
+            //    console.log('The read failed: ' + errorObject.name);
+            //  });
+              const dbRef = ref(getDatabase());
+              get(child(dbRef, `bin`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                  console.log(snapshot.val());
+                } else {
+                  console.log("No data available");
+                }
+              }).catch((error) => {
+                console.error(error);
+              }); 
+            //return onValue(test), (snapshot) =>{
+            //    const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
+                
+            //},
+           // {onlyOnce:true}
+        };
+        function load_c(){
 
-             function write_file(){
-                 var name=window.prompt("Enter the file name: ");
-                 set(ref(database, name +'/'),{
-                     name:name,
-                 });
-             }*/
+            const test = ref(database, 'Csharp-Default/');
+            return onValue(test), (snapshot) =>{
+                const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
+            },
+            {onlyOnce:true}
+        };
+
+        function write_file(){
+            
+            var name=window.prompt("Enter the file name: ");
+            var additionalData=('test')
+            set(ref(database, 'Saved/' + name +'/'),{
+                "name":name,
+                "additionalData":additionalData,
+
+                 }
+                 
+                 );
+             }
+       
+             
 
         return (
             <div className="App">
                 <div className="Menu">
                     <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                        {/*                  <MenuItem>Load</MenuItem>
-                  <SubMenu label="Preset">
-                    <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
-                    <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
-                  </SubMenu>
-                  <MenuItem onClick={write_file}>Save</MenuItem>
-                  <MenuItem>Export</MenuItem>*/}
+                    <MenuItem id="load" value="test" onClick={load_file}> Load</MenuItem>
+                    <SubMenu label="Preset">
+                        <MenuItem id="csharp" value="test" onClick={load_c}>Csharp Model</MenuItem> //change so user does not have to enter for presents;
+                        <MenuItem id="bin" value="test" onClick={load_bin}> Bin Model</MenuItem>
+                    </SubMenu>
+                    <MenuItem onClick={write_file}>Save</MenuItem>
                     </Menu>
                 </div>
                 <div className="PlaySpace">
