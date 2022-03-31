@@ -304,11 +304,11 @@ const App = () => {
                             <div className="info-container" id="display-info">
                                 <h2>Current Node Info</h2>
                                 <b>Name</b>
-                                <p id="info-name">Name</p>
+                                <p className="tab" id="info-name">Name</p>
                                 <b>Description</b>
-                                <p id="info-desc">Desc</p>
+                                <p className="tab" id="info-desc">Desc</p>
                                 <b>Classification</b>
-                                <p id="info-type">Type</p>
+                                <p className="tab" id="info-type">Type</p>
                                 <Button
                                     tooltip="Exit"
                                     styles={{backgroundColor: "red", color: "#FFFFFF"}} onClick={closeInfo}
