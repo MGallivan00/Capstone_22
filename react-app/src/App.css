@@ -39,6 +39,10 @@ div.Menu{
   top: 20px;
 }
 
+div.showNode {
+  display: none;
+}
+
 .btn-primary{
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
@@ -50,7 +54,6 @@ div.Menu{
   border-radius: 20%;
 }
 
-
 /*code adapted from https://www.w3schools.com/howto/howto_js_popup_form.asp*/
 
 .form-popup {
@@ -61,7 +64,7 @@ div.Menu{
 }
 
 .form-container {
-  max-width: 300px;
+  max-width: 400px;
   padding: 10px;
   background-color: white;
   color: black;
