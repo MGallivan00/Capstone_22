@@ -21,7 +21,7 @@ import {getAnalytics} from "firebase/analytics";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
+/*
 const firebaseConfig = {
     apiKey: "AIzaSyALd8fTT_YORi0wwJ7bC_7O347ssGlItvg",
     authDomain: "capstone-pique.firebaseapp.com",
@@ -36,7 +36,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const database = getDatabase();
-
+*/
 
 const options = [{value:"diagnostics", label: 'Diagnostics'},
     {value:"measures", label: 'Measures'},
@@ -153,41 +153,6 @@ const App = () => {
         console.log(storage);
     }
 
-    function format(arr){
-        let format = [];
-            for (const o in options) {
-                //output = key: value;
-                // key == options[o].label
-                // value == entryArr
-                //         entry key = nodeName; value = info
-                //                                       info == {desc: "", child: []}
-
-                let entryArr = []; // array of {[nodeName] : info} in a specific classification
-                    let optionArr = arr.filter(a => a.type === options[o].value);
-                    console.log(optionArr);
-                    optionArr.sort((x, y) => (x.id > y.id) ? 1 : -1);
-                    for (const n in optionArr) {
-                        let node = optionArr[n];
-                        let entryKey = node.id;
-                        let entryValue = {description: node.desc, children: node.children + " instance"}
-                        let entry = {[entryKey]: entryValue};
-                        entryArr.push(entry);
-                    }
-                console.log(entryArr);
-                let org = {[options[o].label]: entryArr};
-                console.log(org);
-                format.push(org);
-                format.sort();
-        }
-        return format;
-        //format will have 5 keys: each of the options.label
-        //format = { [nodeType]:
-        //                      [ {[nodeName]:
-        //                                      {desc: nodeDesc, children: []}
-        //                         }]
-        //          };
-    }
-
     function toJSON(prop) {
         lines.forEach(addChildren);
         storage.sort((a, b) => (a.type > b.type) ? 1 : -1)
@@ -224,7 +189,7 @@ const App = () => {
     }
 
     //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
-    function load_file() {
+    /*function load_file() {
         let name = window.prompt("Enter file name ");
         const test = ref(database, name + '/');
         return onValue(test), (snapshot) => {
@@ -239,7 +204,7 @@ const App = () => {
             name: name,
         });
     }
-
+*/
     const props = {
         interfaces,
         setInterfaces,
@@ -339,11 +304,11 @@ const App = () => {
                             <div className="info-container" id="display-info">
                                 <h2>Current Node Info</h2>
                                 <b>Name</b>
-                                <p className="tab" id="info-name">Name</p>
+                                <p id="info-name">Name</p>
                                 <b>Description</b>
-                                <p className="tab" id="info-desc">Desc</p>
+                                <p id="info-desc">Desc</p>
                                 <b>Classification</b>
-                                <p className="tab" id="info-type">Type</p>
+                                <p id="info-type">Type</p>
                                 <Button
                                     tooltip="Exit"
                                     styles={{backgroundColor: "red", color: "#FFFFFF"}} onClick={closeInfo}
@@ -355,11 +320,12 @@ const App = () => {
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
                                 <MenuItem>Load</MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
-                                {<><SubMenu label="Preset">
+                                {/*<SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
-                                </SubMenu><MenuItem onClick={write_file}>database</MenuItem>
-                                <MenuItem>Export</MenuItem></>}
+                                </SubMenu>
+                                <MenuItem onClick={write_file}>Save</MenuItem>
+                                <MenuItem>Export</MenuItem>*/}
                             </Menu>
                         </div>
                     </div>
