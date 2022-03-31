@@ -38,13 +38,11 @@ const analytics = getAnalytics(app);
 const database = getDatabase();
 
 
-
-//put in order of appearance in JSON
-const options = [{value:"tqi", label: 'TQI'},
-    {value:"quality_aspects", label: 'Quality Aspects'},
-    {value:"product_factors", label: 'Product Factors'},
+const options = [{value:"diagnostics", label: 'Diagnostics'},
     {value:"measures", label: 'Measures'},
-    {value:"diagnostics", label: 'Diagnostics'}];
+    {value:"product_factors", label: 'Product Factors'},
+    {value:"quality_aspects", label: 'Quality Aspects'},
+    {value:"tqi", label: 'TQI'}];
 
 const storage = [];
 const TYPE = ["node"];
@@ -100,9 +98,7 @@ const App = () => {
             // y: e.clientY - y,
             shape: object};
         setNodes([...nodes, newNode]);
-        // let s = { [nodeType] : { [nodeName]: {desc: nodeDesc, children: []}}};
-        let s = { id: nodeName, desc: nodeDesc, type: nodeType, children: []};
-        storage.push(s);
+        storage.push(newNode);
         console.log(nodeName + "; " + nodeDesc + "; "+ nodeType + "; ");
         closeForm();
     }
@@ -127,6 +123,10 @@ const App = () => {
         toJSON(fileName);
     }
 
+    function findNode(node){
+        return (node.id === this);
+    }
+
     function clean(arr){
         let clean = [];
         arr.sort();
@@ -139,11 +139,6 @@ const App = () => {
             }
         }
         return clean;
-    }
-
-    //https://infinitbility.com/how-to-get-key-and-value-from-json-object-in-javascript
-    function findNode(node){
-        return (node.id === this);
     }
 
     //https://www.w3schools.com/jsref/jsref_foreach.asp
@@ -195,8 +190,9 @@ const App = () => {
 
     function toJSON(prop) {
         lines.forEach(addChildren);
-        let s = format(storage);
-        const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
+        storage.sort((a, b) => (a.type > b.type) ? 1 : -1)
+
+        const data = new Blob([JSON.stringify(storage)], {type: 'application/json'});
         const a = document.createElement('a');
         a.download = (prop + ".txt");
         a.href = URL.createObjectURL(data);
