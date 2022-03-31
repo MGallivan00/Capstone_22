@@ -38,11 +38,13 @@ const analytics = getAnalytics(app);
 const database = getDatabase();
 */
 
-const options = [{value:"diagnostics", label: 'Diagnostics'},
-    {value:"measures", label: 'Measures'},
-    {value:"product_factors", label: 'Product Factors'},
+
+//put in order of appearance in JSON
+const options = [{value:"tqi", label: 'TQI'},
     {value:"quality_aspects", label: 'Quality Aspects'},
-    {value:"tqi", label: 'TQI'}];
+    {value:"product_factors", label: 'Product Factors'},
+    {value:"measures", label: 'Measures'},
+    {value:"diagnostics", label: 'Diagnostics'}];
 
 const storage = [];
 const TYPE = ["node"];
@@ -87,7 +89,9 @@ const App = () => {
         }
         let newNode = {id: nodeName, desc: nodeDesc, type: nodeType, children: [], x: 500, y: 500, shape: object};
         setNodes([...nodes, newNode]);
-        storage.push(newNode);
+        // let s = { [nodeType] : { [nodeName]: {desc: nodeDesc, children: []}}};
+        let s = { id: nodeName, desc: nodeDesc, type: nodeType, children: []};
+        storage.push(s);
         console.log(nodeName + "; " + nodeDesc + "; "+ nodeType + "; ");
         console.log(storage);
         closeForm();
@@ -98,10 +102,6 @@ const App = () => {
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t)
         toJSON(fileName);
-    }
-
-    function findNode(node){
-        return (node.id === this);
     }
 
     function clean(arr){
@@ -118,6 +118,11 @@ const App = () => {
         return clean;
     }
 
+    //https://infinitbility.com/how-to-get-key-and-value-from-json-object-in-javascript
+    function findNode(node){
+        return (node.id === this);
+    }
+
     //https://www.w3schools.com/jsref/jsref_foreach.asp
     //can add children but not delete them
     function addChildren(l){
@@ -130,11 +135,45 @@ const App = () => {
         console.log(storage);
     }
 
+    function format(arr){
+        let format = [];
+            for (const o in options) {
+                //output = key: value;
+                // key == options[o].label
+                // value == entryArr
+                //         entry key = nodeName; value = info
+                //                                       info == {desc: "", child: []}
+
+                let entryArr = []; // array of {[nodeName] : info} in a specific classification
+                    let optionArr = arr.filter(a => a.type === options[o].value);
+                    console.log(optionArr);
+                    optionArr.sort((x, y) => (x.id > y.id) ? 1 : -1);
+                    for (const n in optionArr) {
+                        let node = optionArr[n];
+                        let entryKey = node.id;
+                        let entryValue = {description: node.desc, children: node.children + " instance"}
+                        let entry = {[entryKey]: entryValue};
+                        entryArr.push(entry);
+                    }
+                console.log(entryArr);
+                let org = {[options[o].label]: entryArr};
+                console.log(org);
+                format.push(org);
+                format.sort();
+        }
+        return format;
+        //format will have 5 keys: each of the options.label
+        //format = { [nodeType]:
+        //                      [ {[nodeName]:
+        //                                      {desc: nodeDesc, children: []}
+        //                         }]
+        //          };
+    }
+
     function toJSON(prop) {
         lines.forEach(addChildren);
-        storage.sort((a, b) => (a.type > b.type) ? 1 : -1)
-
-        const data = new Blob([JSON.stringify(storage)], {type: 'application/json'});
+        let s = format(storage);
+        const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
         const a = document.createElement('a');
         a.download = (prop + ".txt");
         a.href = URL.createObjectURL(data);
