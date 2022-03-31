@@ -80,21 +80,44 @@ const App = () => {
     function getDesc(prop){ nodeDesc = prop.target.value; }
     function getType(prop){ nodeType = prop.value; }
 
-    function handleDropDynamic() {
+    const handleDropDynamic = (e) => {
         let l = nodes.length;
+        let { x, y } = e.target.getBoundingClientRect();
         let object = TYPE[0];
         while (checkExistence("node" + l)) l++;
         if(nodeName === ""){
             nodeName = "node" + l;
         }
-        let newNode = {id: nodeName, desc: nodeDesc, type: nodeType, children: [], x: 500, y: 500, shape: object};
+        let newNode = {
+            id: nodeName,
+            desc: nodeDesc,
+            type: nodeType,
+            children: [],
+            x: 500,
+            y: 500,
+            // The x and y coordinates should be the location where the node is dropped, but it's not working?
+            // x: e.clientX - x,
+            // y: e.clientY - y,
+            shape: object};
         setNodes([...nodes, newNode]);
         // let s = { [nodeType] : { [nodeName]: {desc: nodeDesc, children: []}}};
         let s = { id: nodeName, desc: nodeDesc, type: nodeType, children: []};
         storage.push(s);
         console.log(nodeName + "; " + nodeDesc + "; "+ nodeType + "; ");
-        console.log(storage);
         closeForm();
+    }
+
+    function showInfo(selected) {
+        openInfo();
+        const index = storage.findIndex(item => {
+            return item.id === selected;
+        });
+        const name = document.getElementById("info-name");
+        name.innerHTML = storage[index].id.toString();
+        const desc = document.getElementById("info-desc");
+        desc.innerHTML = storage[index].desc.toString();
+        const type = document.getElementById("info-type");
+        type.innerHTML = storage[index].type.toString();
     }
 
     function nameFile(){
@@ -184,6 +207,14 @@ const App = () => {
         window.alert("JSON data is save to " + prop + ".txt");
     }
 
+    function openInfo() {
+        document.getElementById("info").style.display = "block";
+    }
+
+    function closeInfo() {
+        document.getElementById("info").style.display = "none";
+    }
+
     function openForm() {
         document.getElementById("popup").style.display = "block";
     }
@@ -220,6 +251,7 @@ const App = () => {
         setNodes,
         selected,
         handleSelect,
+        showInfo,
         actionState,
         setActionState,
         lines,
@@ -230,6 +262,7 @@ const App = () => {
         nodes,
         setNodes,
         selected,
+        showInfo,
         handleSelect,
         actionState,
         setLines,
@@ -247,42 +280,33 @@ const App = () => {
                     onClick={() => handleSelect(null)} >
                     {/* Drag and Drop Tool Bar*/}
                     <div className="toolboxMenu">
-                        <div className="toolboxTitle">Drag & drop me!</div>
-                        <hr />
-                        <div className="toolboxContainer">
-                            {TYPE.map((shapeName) => (
-                                <div
-                                    key={shapeName}
-                                    className={shapeName}
-                                    onDragStart={(e) =>
-                                        e.dataTransfer.setData("shape", shapeName)
-                                    }
-                                    draggable
-                                >
-                                    {shapeName}
-                                </div>
-                            ))}
-                        </div>
+                        {TYPE.map((shapeName) => (
+                            <div
+                                key={shapeName}
+                                className={shapeName}
+                                onDragStart={(e) =>
+                                    e.dataTransfer.setData("shape", shapeName)
+                                }
+                                draggable
+                            >
+                                {"Drag Me!"}
+                            </div>
+                        ))}
                     </div>
                     {/* Nodes Play Space */}
                     <div
                         id="nodesContainer"
                         className="nodesContainer"
                         onDragOver={(e) => e.preventDefault()}
-                        //onDrop={handleDropDynamic}
-                        // TODO: Change how the drop dynamic is handled and have it open the add node form
                         onDrop={openForm}
                     >
                         {/* Dropdown Node Options */}
                         <TopBar {...props} />
 
                         {/* New Node Mapping */}
-                        {/* TODO: Change mapping to work with the array that stores the nodes*/}
-                        {/*{nodes.map((node) => ( <Node*/}
                         {nodes.map((node, i) => ( <Node
                                 {...nodeProps}
                                 key={i} // this seems to be the way to make sure every child has a unique id in a list
-                                // key={node.id}
                                 box={node}
                                 position="absolute"
                                 sidePos="middle"
@@ -305,7 +329,7 @@ const App = () => {
                                        onChange={getDesc}/>
                                 <b>Classification</b>
                                 {/* diagnostic, measures, product_factors, quality_aspects, tqi*/}
-                                {/*drop down messed up for showing values or resetting value*/}
+                                {/* drop-down messed up for showing values or resetting value*/}
                                 <Select id="inputType" options={options} value={"Other"} onChange={getType} />
                                 {/* Submission Button */}
                                 <Button
@@ -314,7 +338,22 @@ const App = () => {
                                 />
                             </div>
                         </div>
-
+                        {/* Node Information Popup */}
+                        <div className="info-popup" id="info">
+                            <div className="info-container" id="display-info">
+                                <h2>Current Node Info</h2>
+                                <b>Name</b>
+                                <p id="info-name">Name</p>
+                                <b>Description</b>
+                                <p id="info-desc">Desc</p>
+                                <b>Classification</b>
+                                <p id="info-type">Type</p>
+                                <Button
+                                    tooltip="Exit"
+                                    styles={{backgroundColor: "red", color: "#FFFFFF"}} onClick={closeInfo}
+                                />
+                            </div>
+                        </div>
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
