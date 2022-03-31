@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, Component } from "react";
 import "./App.css";
+import ImageUpload from "./ImageUpload";
 import Node from "./components/Node";
 import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
@@ -12,6 +13,8 @@ import Select from 'react-select' ; //https://react-select.com/home
 import {getDatabase, ref, set, get, snapshot, onValue, getDocs} from "firebase/database";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
+ 
+
 
 // XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 
@@ -48,6 +51,8 @@ const storage = [];
 const TYPE = ["node"];
 
 const App = () => {
+    
+    
     // with reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
     // and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
     let nodeName = "";
@@ -153,13 +158,14 @@ const App = () => {
         console.log(storage);
     }
 
+
     function toJSON(prop) {
         lines.forEach(addChildren);
         storage.sort((a, b) => (a.type > b.type) ? 1 : -1)
 
         const data = new Blob([JSON.stringify(storage)], {type: 'application/json'});
         const a = document.createElement('a');
-        a.download = (prop + ".txt");
+        a.download = (prop + ".json");
         a.href = URL.createObjectURL(data);
         a.addEventListener('click', (e) => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
@@ -199,8 +205,11 @@ const App = () => {
     };
 
     function write_file() {
+        let branch = window.prompt("Enter the branch name: ");
         let name = window.prompt("Enter the file name: ");
-        set(ref(database, name + '/'), {
+
+
+        set(ref(database, branch+'/'+name + '/'), {
             name: name,
         });
     }
@@ -229,6 +238,17 @@ const App = () => {
         setLines,
         lines
     };
+
+
+    function ihatejsonfiles(ImageUpload){
+        // setItem -> save to localstorage
+        // getItem -> retrieve from localstorage
+        var placeHolder = 20;
+
+
+    }
+
+
 
     return (
         <div>
@@ -323,8 +343,12 @@ const App = () => {
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
-                                </SubMenu><MenuItem onClick={write_file}>database</MenuItem>
-                                <MenuItem>Export</MenuItem></>}
+                                </SubMenu>
+                                <MenuItem onClick={ihatejsonfiles}>database</MenuItem>
+                                <ImageUpload />
+                
+                                </>
+                                }
                             </Menu>
                         </div>
                     </div>
@@ -332,7 +356,7 @@ const App = () => {
                     {lines.map((line, i) => (
                         <Xarrow
                             key={line.props.root + "-" + line.props.end + i}
-                            line={line}
+                            line={line}npm 
                             selected={selected}
                             setSelected={setSelected}
                         />
@@ -342,5 +366,5 @@ const App = () => {
         </div>
     );
 };
-
+    
 export default App;
