@@ -20,9 +20,9 @@ export default ({ setSelected, selected, line: { props } }) => {
         },
     };
     let color = state.color;
-    if (selected && selected.type === 'arrow' && selected.id.root === props.root && selected.id.end === props.end)
+    //if (selected && selected.type === 'arrow' && selected.id.root === props.root && selected.id.end === props.end)
         // selected.stopPropagation();
-        color = 'red';
+        // color = 'red';
     return <Xarrow {...{
         ...defProps,
         ...props,
