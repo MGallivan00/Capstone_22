@@ -45,6 +45,7 @@ const options = [
     {value:"diagnostics", label: 'Diagnostics'}];
 
 const storage = [];
+const childlines = [];
 const TYPE = ["node"];
 const model_object = {
     "factors": {
@@ -68,195 +69,34 @@ const storage_object = {
 
 const JSON_preset = {
     "factors": {
-        "tqi": {
-            "TQI": {
-                "description": "Total software quality",
+    "tqi": {
+        "TQI": {
+            "description": "Total software quality",
                 "children": {
-                    "QualityAspect 01": {
-
-                    },
-                    "QualityAspect 02": {
-
-                    },
-                    "QualityAspect 03": {
-
-                    },
-                    "QualityAspect 04": {
-
-                    }
-                }
-            }
-        },
-        "quality_aspects": {
-            "QualityAspect 01": {
-                "description": "Performance",
-                "children": {
-                    "ProductFactor 01": {
-
-                    }
-                }
-            },
-            "QualityAspect 02": {
-                "description": "Compatibility",
-                "children": {
-                    "ProductFactor 02": {
-
-                    }
-                }
-            },
-            "QualityAspect 03": {
-                "description": "Maintainability",
-                "children": {
-                    "ProductFactor 03": {
-
-                    },
-                    "ProductFactor 04": {
-
-                    }
-                }
-            },
-            "QualityAspect 04": {
-                "description": "Security",
-                "children": {
-                    "ProductFactor 05": {
-
-                    },
-                    "ProductFactor 06": {
-
-                    }
-                }
-            }
-        },
-        "product_factors": {
-            "ProductFactor 01": {
-                "description": "Runtime",
-                "children": {
-                    "Measure 02": {
-
-                    }
-                }
-            },
-            "ProductFactor 02": {
-                "description": "Interoperability",
-                "children": {
-                    "Measure 03": {
-
-                    }
-                }
-            },
-            "ProductFactor 03": {
-                "description": "Modifiability",
-                "children": {
-                    "Measure 01": {
-
-                    },
-                    "Measure 04": {
-
-                    }
-                }
-            },
-            "ProductFactor 04": {
-                "description": "Reusability",
-                "children": {
-                    "Measure 02": {
-
-                    },
-                    "Measure 04": {
-
-                    }
-                }
-            },
-            "ProductFactor 05": {
-                "description": "Confidentiality",
-                "children": {
-                    "Measure 03": {
-
-                    }
-                }
-            },
-            "ProductFactor 06": {
-                "description": "Integrity",
-                "children": {
-                    "Measure 02": {
-
-                    },
-                    "Measure 04": {
-
-                    }
-                }
-            }
-        }
-    },
-    "measures": {
-        "Measure 01": {
-            "description": "Formatting",
-            "positive": false,
-            "children": {
-                "RCS1036": {
-
-                }
-            }
-        },
-        "Measure 02": {
-            "description": "Unused variable",
-            "positive": false,
-            "children": {
-                "CS0649": {
-
-                },
-                "RCS1163": {
-
-                },
-                "RCS1213": {
-
-                }
-            }
-        },
-        "Measure 03": {
-            "description": "Certifications",
-            "positive": false,
-            "children": {
-                "SCS0004": {
-
-                }
-            }
-        },
-        "Measure 04": {
-            "description": "Naming",
-            "positive": false,
-            "children": {
-                "VSTHRD200": {
+                "QualityAspect 01": {
 
                 }
             }
         }
     },
-    "diagnostics": {
-        "CS0649": {
-            "description": "Field is never assigned to, and will always have its default value",
-            "toolName": "Roslynator"
-        },
-        "RCS1036": {
-            "description": "Remove redundant empty line",
-            "toolName": "Roslynator"
-        },
-        "RCS1163": {
-            "description": "Unused parameter",
-            "toolName": "Roslynator"
-        },
-        "RCS1213": {
-            "description": "Remove unused member declaration",
-            "toolName": "Roslynator"
-        },
-        "SCS0004": {
-            "description": "Certificate Validation has been disabled",
-            "toolName": "Roslynator"
-        },
-        "VSTHRD200": {
-            "description": "Use &quot;Async&quot; suffix for async methods",
-            "toolName": "Roslynator"
+    "quality_aspects": {
+        "QualityAspect 01": {
+            "description": "Performance",
+                "children": {
+                "ProductFactor 01": {
+                }
+            }
+        }
+    },
+    "product_factors": {
+        "ProductFactor 01": {
+            "description": "Runtime",
+                "children": {
+
+            }
         }
     }
+}
 }
 
 const App = () => {
@@ -314,30 +154,35 @@ const App = () => {
         storage.push(newNode);
         console.log(storage);
         closeForm();
-        // // Pushes node entry into JSON model object to match expected format
-        // switch (nodeType) {
-        //     case "tqi":
-        //         model_object.factors.tqi[nodeName] = {};
-        //         model_object.factors.tqi[nodeName].description = nodeDesc;
-        //         break;
-        //     case "quality_aspects":
-        //         model_object.factors.quality_aspects[nodeName] = {};
-        //         model_object.factors.quality_aspects[nodeName].description = nodeDesc;
-        //         break;
-        //     case "product_factors":
-        //         model_object.factors.product_factors[nodeName] = {};
-        //         model_object.factors.product_factors[nodeName].description = nodeDesc;
-        //         break;
-        //     case "measures":
-        //         model_object.measures[nodeName] = {};
-        //         model_object.measures[nodeName].description = nodeDesc;
-        //         break;
-        //     case "diagnostics":
-        //         model_object.diagnostics[nodeName] = {};
-        //         model_object.diagnostics[nodeName].description = nodeDesc;
-        //         break;
-        // }
-        // console.log(JSON.stringify(model_object));
+        // Pushes node entry into JSON model object to match expected format
+        switch (nodeType) {
+            case "tqi":
+                model_object.factors.tqi[nodeName] = {};
+                model_object.factors.tqi[nodeName].description = nodeDesc;
+                model_object.factors.tqi[nodeName].children = [];
+                break;
+            case "quality_aspects":
+                model_object.factors.quality_aspects[nodeName] = {};
+                model_object.factors.quality_aspects[nodeName].description = nodeDesc;
+                model_object.factors.quality_aspects[nodeName].children = [];
+                break;
+            case "product_factors":
+                model_object.factors.product_factors[nodeName] = {};
+                model_object.factors.product_factors[nodeName].description = nodeDesc;
+                model_object.factors.product_factors[nodeName].children = [];
+                break;
+            case "measures":
+                model_object.measures[nodeName] = {};
+                model_object.measures[nodeName].description = nodeDesc;
+                model_object.factors.measures[nodeName].children = [];
+                break;
+            case "diagnostics":
+                model_object.diagnostics[nodeName] = {};
+                model_object.diagnostics[nodeName].description = nodeDesc;
+                model_object.factors.diagnostics[nodeName].children = [];
+                break;
+        }
+        //console.log(JSON.stringify(model_object));
     }
 
     function showInfo(selected) {
@@ -353,24 +198,11 @@ const App = () => {
         type.innerHTML = storage[index].type.toString();
     }
 
-    // Uses the package 'flat' to flatten a structured/nested JSON object
-    function unnest(object) {
-        const flatten = require('flat');
-        return flatten(object);
-    }
-
-    // Uses the package 'flat' to inflate a flattened/un-nested JSON object
-    function nest(object) {
-        const unflatten = require('flat').unflatten;
-        return unflatten(object);
-    }
-
     function nameFile(){
-        parse_JSON();
-        // let d = new Date();
-        // let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
-        // let fileName = window.prompt("Enter the filename: ", t)
-        // toJSON(fileName);
+        let d = new Date();
+        let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
+        let fileName = window.prompt("Enter the filename: ", t)
+        toJSON(fileName);
     }
 
     function findNode(node){
@@ -488,7 +320,13 @@ const App = () => {
             shape: object};
         setNodes([...nodes, newNode]);
         storage.push(newNode);
-        console.log(storage);
+            for (let k in nodeChildren) {
+                let p = {props: {start: nodeName, end: k}};
+                console.log(p);
+                setLines([...lines, p]);
+                childlines.push(p);
+            }
+        //console.log(storage);
     }
 
     // Formats entries into the proper nested format before writing to file
@@ -529,10 +367,12 @@ const App = () => {
 
     function toJSON(prop) {
         lines.forEach(addChildren);
-        let s = save_format(storage);
-        const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
+        JSON.stringify(model_object);
+        //let s = save_format(storage);
+        const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
+        //const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
         const a = document.createElement('a');
-        a.download = (prop + ".json");
+        a.download = (prop + ".txt");
         a.href = URL.createObjectURL(data);
         a.addEventListener('click', (e) => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
@@ -638,7 +478,7 @@ const App = () => {
                         <TopBar {...props} />
 
                         {/* New Node Mapping */}
-                        {nodes.map((node, i) => ( <Node
+                        {storage.map((node, i) => ( <Node
                                 {...nodeProps}
                                 key={i} // this seems to be the way to make sure every child has a unique id in a list
                                 box={node}
@@ -694,8 +534,8 @@ const App = () => {
                                 <MenuItem>Load</MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
-                                    <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
-                                    <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
+                                    <MenuItem id="csharp" value="test" onClick={parse_JSON}>Csharp Model</MenuItem>
+                                    <MenuItem id="bin" value="test" onClick={parse_JSON}> Bin Model</MenuItem>
                                 </SubMenu><MenuItem onClick={write_file}>database</MenuItem>
                                     <MenuItem>Export</MenuItem></>}
                             </Menu>
@@ -708,6 +548,15 @@ const App = () => {
                             line={line}
                             selected={selected}
                             setSelected={setSelected}
+                        />
+                    ))}
+                    {/* Xarrow connections for loading preset */}
+                    {childlines.map((line, i) => (
+                        <Xarrow
+                            key={line.props.start + "-" + line.props.end + i}
+                            line={line}
+                            start={line.props.start}
+                            end={line.props.end}
                         />
                     ))}
                 </div>
