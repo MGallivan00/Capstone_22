@@ -1,10 +1,7 @@
-// 20220128113322
-// https://raw.githubusercontent.com/MSUSEL/msusel-pique-csharp-sec/main/src/main/resources/pique-csharp-sec_description.json
-
 {
     "name": "ESMS Reports PowerBI",
     "additionalData": {
-  
+
     },
     "global_config": {
       "benchmark_strategy": "pique.calibration.NaiveBenchmarker",
