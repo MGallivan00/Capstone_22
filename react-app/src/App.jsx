@@ -344,7 +344,7 @@ const App = () => {
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
                                 </SubMenu>
-                                <MenuItem onClick={ihatejsonfiles}>database</MenuItem>
+                                <MenuItem onClick={write_file}>database</MenuItem>
                                 <ImageUpload />
                 
                                 </>
