@@ -5,24 +5,32 @@ import './TopBar.css';
 // XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 const actions = {
     // node: ['Add Connections', 'Remove Connections', 'Delete'],
-    node: ['Add Connections', 'Delete'],
+    node: ['Edit Name', 'Add Connections', 'Delete', 'Show Information'],
     arrow: ['Edit Properties', 'Remove Connection'],
 };
 
 const TopBar = (props) => {
     const handleEditAction = (action) => {
         switch (action) {
-            // case 'Edit Name':
-            //     props.setNodes((nodes) => {
-            //         let newName = prompt('Enter new name: ');
-            //         while ([...nodes, ...props.interfaces].map((a) => a.id).includes(newName))
-            //             newName = prompt('Name already in use, please choose another: ');
-            //         if (!newName) return;
-            //         return nodes.map((node) => (node.id === props.selected.id ? { ...node, id: newName } : node));
-            //     });
-            //     break;
+            case 'Edit Name':
+                props.setNodes((nodes) => {
+                    let newName = prompt('Enter new name: ');
+                    while ([...nodes, ...props.interfaces].map((a) => a.id).includes(newName))
+                        newName = prompt('Name already in use, please choose another: ');
+                    if (newName === null) {
+                        return;
+                    }
+                    return nodes.map((node) => (node.id === props.selected.id ? { ...node, id: newName } : node));
+                });
+                break;
             case 'Add Connections':
                 props.setActionState(action);
+                break;
+            case 'Remove Connections':
+                props.setActionState(action);
+                break;
+            case 'Show Information':
+                props.showInfo(props.selected.id);
                 break;
             case 'Remove Connection':
                 props.setLines((lines) =>

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, Component } from "react";
 import "./App.css";
+import ImageUpload from "./ImageUpload";
 import Node from "./components/Node";
 import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
@@ -12,6 +13,8 @@ import Select from 'react-select' ; //https://react-select.com/home
 import {getDatabase, ref, set, get, snapshot, onValue, getDocs} from "firebase/database";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
+ 
+
 
 // XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 
@@ -21,7 +24,7 @@ import {getAnalytics} from "firebase/analytics";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-/*
+
 const firebaseConfig = {
     apiKey: "AIzaSyALd8fTT_YORi0wwJ7bC_7O347ssGlItvg",
     authDomain: "capstone-pique.firebaseapp.com",
@@ -36,7 +39,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const database = getDatabase();
-*/
+
 
 
 //put in order of appearance in JSON
@@ -50,6 +53,8 @@ const storage = [];
 const TYPE = ["node"];
 
 const App = () => {
+    
+    
     // with reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
     // and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
     let nodeName = "";
@@ -80,21 +85,44 @@ const App = () => {
     function getDesc(prop){ nodeDesc = prop.target.value; }
     function getType(prop){ nodeType = prop.value; }
 
-    function handleDropDynamic() {
+    const handleDropDynamic = (e) => {
         let l = nodes.length;
+        let { x, y } = e.target.getBoundingClientRect();
         let object = TYPE[0];
         while (checkExistence("node" + l)) l++;
         if(nodeName === ""){
             nodeName = "node" + l;
         }
-        let newNode = {id: nodeName, desc: nodeDesc, type: nodeType, children: [], x: 500, y: 500, shape: object};
+        let newNode = {
+            id: nodeName,
+            desc: nodeDesc,
+            type: nodeType,
+            children: [],
+            x: 500,
+            y: 500,
+            // The x and y coordinates should be the location where the node is dropped, but it's not working?
+            // x: e.clientX - x,
+            // y: e.clientY - y,
+            shape: object};
         setNodes([...nodes, newNode]);
         // let s = { [nodeType] : { [nodeName]: {desc: nodeDesc, children: []}}};
         let s = { id: nodeName, desc: nodeDesc, type: nodeType, children: []};
         storage.push(s);
         console.log(nodeName + "; " + nodeDesc + "; "+ nodeType + "; ");
-        console.log(storage);
         closeForm();
+    }
+
+    function showInfo(selected) {
+        openInfo();
+        const index = storage.findIndex(item => {
+            return item.id === selected;
+        });
+        const name = document.getElementById("info-name");
+        name.innerHTML = storage[index].id.toString();
+        const desc = document.getElementById("info-desc");
+        desc.innerHTML = storage[index].desc.toString();
+        const type = document.getElementById("info-type");
+        type.innerHTML = storage[index].type.toString();
     }
 
     function nameFile(){
@@ -135,6 +163,7 @@ const App = () => {
         console.log(storage);
     }
 
+<<<<<<< HEAD
     function format(arr){
         let format = [];
             for (const o in options) {
@@ -169,19 +198,29 @@ const App = () => {
         //                         }]
         //          };
     }
+=======
+>>>>>>> 240f82358518a6d04af544898b48e03ff866b1cd
 
     function toJSON(prop) {
         lines.forEach(addChildren);
         let s = format(storage);
         const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
         const a = document.createElement('a');
-        a.download = (prop + ".txt");
+        a.download = (prop + ".json");
         a.href = URL.createObjectURL(data);
         a.addEventListener('click', (e) => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
         a.click();
         window.alert("JSON data is save to " + prop + ".txt");
+    }
+
+    function openInfo() {
+        document.getElementById("info").style.display = "block";
+    }
+
+    function closeInfo() {
+        document.getElementById("info").style.display = "none";
     }
 
     function openForm() {
@@ -197,7 +236,7 @@ const App = () => {
     }
 
     //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
-    /*function load_file() {
+    function load_file() {
         let name = window.prompt("Enter file name ");
         const test = ref(database, name + '/');
         return onValue(test), (snapshot) => {
@@ -207,12 +246,15 @@ const App = () => {
     };
 
     function write_file() {
+        let branch = window.prompt("Enter the branch name: ");
         let name = window.prompt("Enter the file name: ");
-        set(ref(database, name + '/'), {
+
+
+        set(ref(database, branch+'/'+name + '/'), {
             name: name,
         });
     }
-*/
+
     const props = {
         interfaces,
         setInterfaces,
@@ -220,6 +262,7 @@ const App = () => {
         setNodes,
         selected,
         handleSelect,
+        showInfo,
         actionState,
         setActionState,
         lines,
@@ -230,11 +273,23 @@ const App = () => {
         nodes,
         setNodes,
         selected,
+        showInfo,
         handleSelect,
         actionState,
         setLines,
         lines
     };
+
+
+    function ihatejsonfiles(ImageUpload){
+        // setItem -> save to localstorage
+        // getItem -> retrieve from localstorage
+        var placeHolder = 20;
+
+
+    }
+
+
 
     return (
         <div>
@@ -247,42 +302,33 @@ const App = () => {
                     onClick={() => handleSelect(null)} >
                     {/* Drag and Drop Tool Bar*/}
                     <div className="toolboxMenu">
-                        <div className="toolboxTitle">Drag & drop me!</div>
-                        <hr />
-                        <div className="toolboxContainer">
-                            {TYPE.map((shapeName) => (
-                                <div
-                                    key={shapeName}
-                                    className={shapeName}
-                                    onDragStart={(e) =>
-                                        e.dataTransfer.setData("shape", shapeName)
-                                    }
-                                    draggable
-                                >
-                                    {shapeName}
-                                </div>
-                            ))}
-                        </div>
+                        {TYPE.map((shapeName) => (
+                            <div
+                                key={shapeName}
+                                className={shapeName}
+                                onDragStart={(e) =>
+                                    e.dataTransfer.setData("shape", shapeName)
+                                }
+                                draggable
+                            >
+                                {"Drag Me!"}
+                            </div>
+                        ))}
                     </div>
                     {/* Nodes Play Space */}
                     <div
                         id="nodesContainer"
                         className="nodesContainer"
                         onDragOver={(e) => e.preventDefault()}
-                        //onDrop={handleDropDynamic}
-                        // TODO: Change how the drop dynamic is handled and have it open the add node form
                         onDrop={openForm}
                     >
                         {/* Dropdown Node Options */}
                         <TopBar {...props} />
 
                         {/* New Node Mapping */}
-                        {/* TODO: Change mapping to work with the array that stores the nodes*/}
-                        {/*{nodes.map((node) => ( <Node*/}
                         {nodes.map((node, i) => ( <Node
                                 {...nodeProps}
                                 key={i} // this seems to be the way to make sure every child has a unique id in a list
-                                // key={node.id}
                                 box={node}
                                 position="absolute"
                                 sidePos="middle"
@@ -305,7 +351,7 @@ const App = () => {
                                        onChange={getDesc}/>
                                 <b>Classification</b>
                                 {/* diagnostic, measures, product_factors, quality_aspects, tqi*/}
-                                {/*drop down messed up for showing values or resetting value*/}
+                                {/* drop-down messed up for showing values or resetting value*/}
                                 <Select id="inputType" options={options} value={"Other"} onChange={getType} />
                                 {/* Submission Button */}
                                 <Button
@@ -314,18 +360,36 @@ const App = () => {
                                 />
                             </div>
                         </div>
-
+                        {/* Node Information Popup */}
+                        <div className="info-popup" id="info">
+                            <div className="info-container" id="display-info">
+                                <h2>Current Node Info</h2>
+                                <b>Name</b>
+                                <p className="tab" id="info-name">Name</p>
+                                <b>Description</b>
+                                <p className="tab" id="info-desc">Desc</p>
+                                <b>Classification</b>
+                                <p className="tab" id="info-type">Type</p>
+                                <Button
+                                    tooltip="Exit"
+                                    styles={{backgroundColor: "red", color: "#FFFFFF"}} onClick={closeInfo}
+                                />
+                            </div>
+                        </div>
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
                                 <MenuItem>Load</MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
-                                {/*<SubMenu label="Preset">
+                                {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
                                 </SubMenu>
-                                <MenuItem onClick={write_file}>Save</MenuItem>
-                                <MenuItem>Export</MenuItem>*/}
+                                <MenuItem onClick={ihatejsonfiles}>database</MenuItem>
+                                <ImageUpload />
+                
+                                </>
+                                }
                             </Menu>
                         </div>
                     </div>
@@ -333,7 +397,7 @@ const App = () => {
                     {lines.map((line, i) => (
                         <Xarrow
                             key={line.props.root + "-" + line.props.end + i}
-                            line={line}
+                            line={line}npm 
                             selected={selected}
                             setSelected={setSelected}
                         />
@@ -343,5 +407,5 @@ const App = () => {
         </div>
     );
 };
-
+    
 export default App;
