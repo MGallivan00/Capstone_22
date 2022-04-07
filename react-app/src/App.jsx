@@ -12,7 +12,7 @@ import {getDatabase, onValue, ref, set} from "firebase/database";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 
-// XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
+// Developed with code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -45,7 +45,6 @@ const options = [
     {value:"diagnostics", label: 'Diagnostics'}];
 
 const storage = [];
-const childlines = [];
 const TYPE = ["node"];
 const model_object = {
     "factors": {
@@ -56,48 +55,6 @@ const model_object = {
     "measures": {},
     "diagnostics": {}
 };
-
-const storage_object = {
-    id:"",
-    desc:"",
-    type:"",
-    children:[],
-    shape:"node",
-    x: 500,
-    y:500
-}
-
-const JSON_preset = {
-    "factors": {
-    "tqi": {
-        "TQI": {
-            "description": "Total software quality",
-                "children": {
-                "QualityAspect 01": {
-
-                }
-            }
-        }
-    },
-    "quality_aspects": {
-        "QualityAspect 01": {
-            "description": "Performance",
-                "children": {
-                "ProductFactor 01": {
-                }
-            }
-        }
-    },
-    "product_factors": {
-        "ProductFactor 01": {
-            "description": "Runtime",
-                "children": {
-
-            }
-        }
-    }
-}
-}
 
 const App = () => {
     // with reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
@@ -159,32 +116,35 @@ const App = () => {
             case "tqi":
                 model_object.factors.tqi[nodeName] = {};
                 model_object.factors.tqi[nodeName].description = nodeDesc;
-                model_object.factors.tqi[nodeName].children = [];
+                model_object.factors.tqi[nodeName].children = {};
                 break;
             case "quality_aspects":
                 model_object.factors.quality_aspects[nodeName] = {};
                 model_object.factors.quality_aspects[nodeName].description = nodeDesc;
-                model_object.factors.quality_aspects[nodeName].children = [];
+                model_object.factors.quality_aspects[nodeName].children = {};
                 break;
             case "product_factors":
                 model_object.factors.product_factors[nodeName] = {};
                 model_object.factors.product_factors[nodeName].description = nodeDesc;
-                model_object.factors.product_factors[nodeName].children = [];
+                model_object.factors.product_factors[nodeName].children = {};
                 break;
             case "measures":
                 model_object.measures[nodeName] = {};
                 model_object.measures[nodeName].description = nodeDesc;
-                model_object.factors.measures[nodeName].children = [];
+                model_object.measures[nodeName].children = {};
                 break;
             case "diagnostics":
                 model_object.diagnostics[nodeName] = {};
                 model_object.diagnostics[nodeName].description = nodeDesc;
-                model_object.factors.diagnostics[nodeName].children = [];
                 break;
         }
-        //console.log(JSON.stringify(model_object));
+        console.log(JSON.stringify(model_object));
     }
 
+    /**
+     * Grabs the selected node information and manipulates the HTML to display the current node info
+     * @constructor
+     */
     function showInfo(selected) {
         openInfo();
         const index = storage.findIndex(item => {
@@ -199,46 +159,86 @@ const App = () => {
     }
 
     function nameFile(){
+        // TODO: Read from JSON file and store into local variable. Pass that variable to parse_JSON()
+        parse_JSON();
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t)
         toJSON(fileName);
     }
 
-    function findNode(node){
-        return (node.id === this);
-    }
-
-    function clean(arr){
-        let clean = [];
-        arr.sort();
-        let i = 0;
-        clean.push(arr[i]);
-        for (let j = 1; j < arr.length; j++){
-            if(arr[j] !== arr[i]){
-                clean.push(arr[j]);
-                i = j;
+    /**
+     * As nodes are added to the screen, they are added into the existing global JSON "model object",
+     * however, the children cannot be added to the model object until after the nodes are defined.
+     * This function parses the model object with the parent key name in hand and adds the child name
+     * to the parent - children structure.
+     * @constructor
+     */
+    function addChildren(l){
+        let parent = l.props.start,
+            child = l.props.end;
+        const obj = JSON.parse(JSON.stringify(model_object)),
+            factors = obj.factors,
+            measures = obj.measures;
+        for (let factor in factors){
+            switch(factor) {
+                case "tqi":
+                    let tqi_type = factors.tqi;
+                    for (const name in tqi_type) {
+                        if (name === parent) {
+                            model_object.factors.tqi[parent].children[child] = {};
+                        }
+                    }
+                    break;
+                case "quality_aspects":
+                    let qa_type = factors.quality_aspects;
+                    for (const name in qa_type) {
+                        if (name === parent) {
+                            model_object.factors.quality_aspects[parent].children[child] = {};
+                        }
+                    }
+                    break;
+                case "product_factors":
+                    let pf_type = factors.product_factors;
+                    for (const name in pf_type) {
+                        if (name === parent) {
+                            model_object.factors.product_factors[parent].children[child] = {};
+                        }
+                    }
+                    break;
             }
         }
-        return clean;
+        for (let name in measures) {
+            if (name === parent) {
+                model_object.measures[parent].children[child] = {};
+            }
+        }
+        // Diagnostic type nodes don't have children, so we don't need to worry about those.
     }
 
-    //https://www.w3schools.com/jsref/jsref_foreach.asp
-    //can add children but not delete them
-    function addChildren(l){
-        let child = l.props.end;
-        let p = l.props.start;
-        let parent = storage.find(findNode, p);
-        console.log(parent.children);
-        parent.children.push(child);
-        parent.children = clean(parent.children);
-        console.log(storage);
+    function toJSON(prop) {
+        lines.forEach(addChildren);
+        console.log(JSON.stringify(model_object));
+        const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.download = (prop + ".json");
+        a.href = URL.createObjectURL(data);
+        a.addEventListener('click', (e) => {
+            setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
+        });
+        a.click();
+        window.alert("JSON data is save to " + prop + ".json");
     }
 
-
-    function parse_JSON(){
+    /**
+     * Takes the incoming JSON file that needs to be stored into a JSON object locally,
+     * parses though it and adds entries to our local storage object. Later that object
+     * is iterated over and the nodes are populated onto the screen.
+     * @constructor
+     */
+    function parse_JSON(incoming_json){
         // makes JSON object parse-able
-        const obj = JSON.parse(JSON.stringify(JSON_preset));
+        const obj = JSON.parse(JSON.stringify(incoming_json));
         const
             factors = obj.factors,
             measures = obj.measures,
@@ -258,26 +258,17 @@ const App = () => {
                     break;
                 case "quality_aspects":
                     let qa_type = factors.quality_aspects;
-                    // let entries = [];
                     for (const name in qa_type) {
                         store_node_from_JSON(
                             name,
-                            qa_type[name].description,
+                            qa_type[name].descriptionHomestuck,
                             factor,
                             qa_type[name].children
                         )
-                        // entries.push(name);
                     }
-                    // console.log(entries);
-                    // entries.forEach(index => store_node_from_JSON(
-                    //     index,
-                    //     qa_type[index].description,
-                    //     factor,
-                    //     qa_type[index].children));
                     break;
                 case "product_factors":
                     let pf_type = factors.product_factors;
-                    // let entries = [];
                     for (const name in pf_type) {
                         store_node_from_JSON(
                             name,
@@ -285,7 +276,6 @@ const App = () => {
                             factor,
                             pf_type[name].children
                         )
-                        // entries.push(name);
                     }
                     break;
             }
@@ -309,7 +299,6 @@ const App = () => {
     }
 
     // Formats incoming JSON into the proper format for viewing on screen
-    // TODO: Parameters?
     function store_node_from_JSON(nodeName, nodeDesc, nodeType, nodeChildren){
         let object = TYPE[0];
         let newNode = {
@@ -320,65 +309,7 @@ const App = () => {
             shape: object};
         setNodes([...nodes, newNode]);
         storage.push(newNode);
-            for (let k in nodeChildren) {
-                let p = {props: {start: nodeName, end: k}};
-                console.log(p);
-                setLines([...lines, p]);
-                childlines.push(p);
-            }
-        //console.log(storage);
-    }
-
-    // Formats entries into the proper nested format before writing to file
-    function save_format(arr){
-        let format = [];
-        for (const o in options) {
-            //output = key: value;
-            // key == options[o].label
-            // value == entryArr
-            //         entry key = nodeName; value = info
-            //                                       info == {desc: "", child: []}
-
-            let entryArr = []; // array of {[nodeName] : info} in a specific classification
-            let optionArr = arr.filter(a => a.type === options[o].value);
-            console.log(optionArr);
-            optionArr.sort((x, y) => (x.id > y.id) ? 1 : -1);
-            for (const n in optionArr) {
-                let node = optionArr[n];
-                let entryKey = node.id;
-                let entryValue = {description: node.desc, children: node.children}
-                let entry = {[entryKey]: entryValue};
-                entryArr.push(entry);
-            }
-            console.log(entryArr);
-            let org = {[options[o].label]: entryArr};
-            console.log(org);
-            format.push(org);
-            format.sort();
-        }
-        return format;
-        //format will have 5 keys: each of the options.label
-        //format = { [nodeType]:
-        //                      [ {[nodeName]:
-        //                                      {desc: nodeDesc, children: []}
-        //                         }]
-        //          };
-    }
-
-    function toJSON(prop) {
-        lines.forEach(addChildren);
-        JSON.stringify(model_object);
-        //let s = save_format(storage);
-        const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
-        //const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
-        const a = document.createElement('a');
-        a.download = (prop + ".txt");
-        a.href = URL.createObjectURL(data);
-        a.addEventListener('click', (e) => {
-            setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
-        });
-        a.click();
-        window.alert("JSON data is save to " + prop + ".json");
+        console.log(storage);
     }
 
     function openInfo() {
@@ -478,7 +409,7 @@ const App = () => {
                         <TopBar {...props} />
 
                         {/* New Node Mapping */}
-                        {storage.map((node, i) => ( <Node
+                        {nodes.map((node, i) => ( <Node
                                 {...nodeProps}
                                 key={i} // this seems to be the way to make sure every child has a unique id in a list
                                 box={node}
@@ -534,8 +465,8 @@ const App = () => {
                                 <MenuItem>Load</MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
-                                    <MenuItem id="csharp" value="test" onClick={parse_JSON}>Csharp Model</MenuItem>
-                                    <MenuItem id="bin" value="test" onClick={parse_JSON}> Bin Model</MenuItem>
+                                    <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
+                                    <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
                                 </SubMenu><MenuItem onClick={write_file}>database</MenuItem>
                                     <MenuItem>Export</MenuItem></>}
                             </Menu>
@@ -548,15 +479,6 @@ const App = () => {
                             line={line}
                             selected={selected}
                             setSelected={setSelected}
-                        />
-                    ))}
-                    {/* Xarrow connections for loading preset */}
-                    {childlines.map((line, i) => (
-                        <Xarrow
-                            key={line.props.start + "-" + line.props.end + i}
-                            line={line}
-                            start={line.props.start}
-                            end={line.props.end}
                         />
                     ))}
                 </div>

@@ -1,8 +1,8 @@
+// Forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 import React from 'react';
 import './TopBar.css';
 // import MaterialIcon from "material-icons-react";
 
-// XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 const actions = {
     // node: ['Add Connections', 'Remove Connections', 'Delete'],
     node: ['Edit Name', 'Add Connections', 'Delete', 'Show Information'],
