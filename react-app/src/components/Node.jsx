@@ -1,9 +1,9 @@
+// Forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 import React from "react";
 import "./Node.css";
 import Draggable from "react-draggable";
 import { useXarrow } from "react-xarrows";
 
-// XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 const Node = (props) => {
     const updateXarrow = useXarrow();
     const handleClick = (e) => {
