@@ -11,6 +11,7 @@ import Select from 'react-select'; //https://react-select.com/home
 import {getDatabase, onValue, ref, set} from "firebase/database";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
+import xarrow from "./components/Xarrow";
 
 // XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 
@@ -69,34 +70,195 @@ const storage_object = {
 
 const JSON_preset = {
     "factors": {
-    "tqi": {
-        "TQI": {
-            "description": "Total software quality",
+        "tqi": {
+            "TQI": {
+                "description": "Total software quality",
                 "children": {
-                "QualityAspect 01": {
+                    "QualityAspect 01": {
+
+                    },
+                    "QualityAspect 02": {
+
+                    },
+                    "QualityAspect 03": {
+
+                    },
+                    "QualityAspect 04": {
+
+                    }
+                }
+            }
+        },
+        "quality_aspects": {
+            "QualityAspect 01": {
+                "description": "Performance",
+                "children": {
+                    "ProductFactor 01": {
+
+                    }
+                }
+            },
+            "QualityAspect 02": {
+                "description": "Compatibility",
+                "children": {
+                    "ProductFactor 02": {
+
+                    }
+                }
+            },
+            "QualityAspect 03": {
+                "description": "Maintainability",
+                "children": {
+                    "ProductFactor 03": {
+
+                    },
+                    "ProductFactor 04": {
+
+                    }
+                }
+            },
+            "QualityAspect 04": {
+                "description": "Security",
+                "children": {
+                    "ProductFactor 05": {
+
+                    },
+                    "ProductFactor 06": {
+
+                    }
+                }
+            }
+        },
+        "product_factors": {
+            "ProductFactor 01": {
+                "description": "Runtime",
+                "children": {
+                    "Measure 02": {
+
+                    }
+                }
+            },
+            "ProductFactor 02": {
+                "description": "Interoperability",
+                "children": {
+                    "Measure 03": {
+
+                    }
+                }
+            },
+            "ProductFactor 03": {
+                "description": "Modifiability",
+                "children": {
+                    "Measure 01": {
+
+                    },
+                    "Measure 04": {
+
+                    }
+                }
+            },
+            "ProductFactor 04": {
+                "description": "Reusability",
+                "children": {
+                    "Measure 02": {
+
+                    },
+                    "Measure 04": {
+
+                    }
+                }
+            },
+            "ProductFactor 05": {
+                "description": "Confidentiality",
+                "children": {
+                    "Measure 03": {
+
+                    }
+                }
+            },
+            "ProductFactor 06": {
+                "description": "Integrity",
+                "children": {
+                    "Measure 02": {
+
+                    },
+                    "Measure 04": {
+
+                    }
+                }
+            }
+        }
+    },
+    "measures": {
+        "Measure 01": {
+            "description": "Formatting",
+            "positive": false,
+            "children": {
+                "RCS1036": {
+
+                }
+            }
+        },
+        "Measure 02": {
+            "description": "Unused variable",
+            "positive": false,
+            "children": {
+                "CS0649": {
+
+                },
+                "RCS1163": {
+
+                },
+                "RCS1213": {
+
+                }
+            }
+        },
+        "Measure 03": {
+            "description": "Certifications",
+            "positive": false,
+            "children": {
+                "SCS0004": {
+
+                }
+            }
+        },
+        "Measure 04": {
+            "description": "Naming",
+            "positive": false,
+            "children": {
+                "VSTHRD200": {
 
                 }
             }
         }
     },
-    "quality_aspects": {
-        "QualityAspect 01": {
-            "description": "Performance",
-                "children": {
-                "ProductFactor 01": {
-                }
-            }
-        }
-    },
-    "product_factors": {
-        "ProductFactor 01": {
-            "description": "Runtime",
-                "children": {
-
-            }
+    "diagnostics": {
+        "CS0649": {
+            "description": "Field is never assigned to, and will always have its default value",
+            "toolName": "Roslynator"
+        },
+        "RCS1036": {
+            "description": "Remove redundant empty line",
+            "toolName": "Roslynator"
+        },
+        "RCS1163": {
+            "description": "Unused parameter",
+            "toolName": "Roslynator"
+        },
+        "RCS1213": {
+            "description": "Remove unused member declaration",
+            "toolName": "Roslynator"
+        },
+        "SCS0004": {
+            "description": "Certificate Validation has been disabled",
+            "toolName": "Roslynator"
+        },
+        "VSTHRD200": {
+            "description": "Use &quot;Async&quot; suffix for async methods",
+            "toolName": "Roslynator"
         }
     }
-}
 }
 
 const App = () => {
@@ -144,11 +306,13 @@ const App = () => {
             desc: nodeDesc,
             type: nodeType,
             children: [],
-            x: 500,
-            y: 500,
+            x: e.clientX,
+            y: e.clientY - 100,
+            // x: 500,
+            // y: 500,
             // The x and y coordinates should be the location where the node is dropped, but it's not working?
-            // x: e.clientX - x,
-            // y: e.clientY - y,
+            //x: e.clientX - x,
+            //y: e.clientX - y,
             shape: object};
         setNodes([...nodes, newNode]);
         storage.push(newNode);
@@ -230,11 +394,10 @@ const App = () => {
         let p = l.props.start;
         let parent = storage.find(findNode, p);
         console.log(parent.children);
-        parent.children.push(child);
+        (parent.children).push(child);
         parent.children = clean(parent.children);
         console.log(storage);
     }
-
 
     function parse_JSON(){
         // makes JSON object parse-able
@@ -265,15 +428,7 @@ const App = () => {
                             qa_type[name].description,
                             factor,
                             qa_type[name].children
-                        )
-                        // entries.push(name);
-                    }
-                    // console.log(entries);
-                    // entries.forEach(index => store_node_from_JSON(
-                    //     index,
-                    //     qa_type[index].description,
-                    //     factor,
-                    //     qa_type[index].children));
+                        )}
                     break;
                 case "product_factors":
                     let pf_type = factors.product_factors;
@@ -285,7 +440,6 @@ const App = () => {
                             factor,
                             pf_type[name].children
                         )
-                        // entries.push(name);
                     }
                     break;
             }
@@ -307,26 +461,68 @@ const App = () => {
             )
         }
     }
+/*
 
+    document.addEventListener('mouseup' , (event) => {
+     console.log(`Mouse X: ${event.clientX}, Mouse Y: ${event.clientY}`);
+ });
+*/
+
+    let t;
+    let c = 0;
     // Formats incoming JSON into the proper format for viewing on screen
     // TODO: Parameters?
     function store_node_from_JSON(nodeName, nodeDesc, nodeType, nodeChildren){
         let object = TYPE[0];
+        let nodewidth = nodeName.toString().length;
+        let xpos, ypos;
+
+        switch (nodeType){
+            case "tqi":
+                ypos = 180;
+                break;
+            case "quality_aspects":
+                ypos = 300;
+                break;
+            case "product_factors":
+                ypos = 420;
+                break;
+            case "measures":
+                ypos = 540;
+                break;
+            case "diagnostics":
+                ypos = 660;
+                break;
+        }
+
+        console.log(t + " : "  + nodeType)
+        if(t !== nodeType){
+            c = 0;
+            t = nodeType;
+        } else{
+            c++;
+        }
+        //xpos = 850 + c*150*(Math.pow(-1, storage.length % 2)); //more centered
+        xpos = 250 - nodewidth*3.2 + c*200; //left justified
+        console.log(nodeName + " Storage length: " + storage.length + " x: " + xpos + " y: " + ypos);
         let newNode = {
             id: nodeName,
             desc: nodeDesc,
             type: nodeType,
             children: nodeChildren,
+            x: xpos,
+            y: ypos,
             shape: object};
         setNodes([...nodes, newNode]);
         storage.push(newNode);
-            for (let k in nodeChildren) {
-                let p = {props: {start: nodeName, end: k}};
-                console.log(p);
-                setLines([...lines, p]);
-                childlines.push(p);
-            }
         //console.log(storage);
+        for (let k in nodeChildren) {
+            let p = {props: {start: nodeName, end: k}};
+            //console.log(p);
+            setLines([...lines, p]);
+            childlines.push(p);
+        }
+
     }
 
     // Formats entries into the proper nested format before writing to file
@@ -367,10 +563,10 @@ const App = () => {
 
     function toJSON(prop) {
         lines.forEach(addChildren);
-        JSON.stringify(model_object);
-        //let s = save_format(storage);
-        const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
-        //const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
+        //JSON.stringify(model_object);
+        let s = save_format(storage);
+        //const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
+        const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
         const a = document.createElement('a');
         a.download = (prop + ".txt");
         a.href = URL.createObjectURL(data);
