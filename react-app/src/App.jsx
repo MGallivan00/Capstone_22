@@ -6,11 +6,11 @@ import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
 import {Button} from 'react-floating-action-button'
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
-import '@szhsin/react-menu/dist/index.css';
-import Select from 'react-select'; //https://react-select.com/home
 import {getDatabase, onValue, ref, set} from "firebase/database";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
+import Select from 'react-select'; //https://react-select.com/home
+import '@szhsin/react-menu/dist/index.css';
 
 // Developed with code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 
@@ -20,7 +20,6 @@ import {getAnalytics} from "firebase/analytics";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
 const firebaseConfig = {
     apiKey: "AIzaSyALd8fTT_YORi0wwJ7bC_7O347ssGlItvg",
     authDomain: "capstone-pique.firebaseapp.com",
@@ -32,9 +31,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const database = getDatabase();
+const
+    app = initializeApp(firebaseConfig),
+    analytics = getAnalytics(app),
+    database = getDatabase();
 
 
 const options = [
@@ -44,32 +44,33 @@ const options = [
     {value:"measures", label: 'Measures'},
     {value:"diagnostics", label: 'Diagnostics'}];
 
-const storage = [];
-const TYPE = ["node"];
-const model_object = {
-    "factors": {
-        "tqi": {},
-        "quality_aspects": {},
-        "product_factors": {}
-    },
-    "measures": {},
-    "diagnostics": {}
-};
+const
+    storage = [],
+    TYPE = ["node"],
+    model_object = {
+        "factors": {
+            "tqi": {},
+            "quality_aspects": {},
+            "product_factors": {}
+        },
+        "measures": {},
+        "diagnostics": {}
+    };
 
 const App = () => {
     // with reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
     // and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
-    let nodeName = "";
-    let nodeDesc = "";
-    let nodeType = "other";
+    let
+        nodeName = "",
+        nodeDesc = "",
+        nodeType = "other";
 
-    const [interfaces, setInterfaces] = useState([]);
-
-    const [nodes, setNodes] = useState([]);
-    const [lines, setLines] = useState([]);
-
-    const [selected, setSelected] = useState(null);
-    const [actionState, setActionState] = useState("Normal");
+    const
+        [interfaces, setInterfaces] = useState([]),
+        [nodes, setNodes] = useState([]),
+        [lines, setLines] = useState([]),
+        [selected, setSelected] = useState(null),
+        [actionState, setActionState] = useState("Normal");
 
     const handleSelect = (e) => {
         if (e === null) {
@@ -143,7 +144,7 @@ const App = () => {
 
     /**
      * Grabs the selected node information and manipulates the HTML to display the current node info
-     * @constructor
+     * @function
      */
     function showInfo(selected) {
         openInfo();
@@ -172,7 +173,7 @@ const App = () => {
      * however, the children cannot be added to the model object until after the nodes are defined.
      * This function parses the model object with the parent key name in hand and adds the child name
      * to the parent - children structure.
-     * @constructor
+     * @function
      */
     function addChildren(l){
         let parent = l.props.start,
@@ -234,7 +235,7 @@ const App = () => {
      * Takes the incoming JSON file that needs to be stored into a JSON object locally,
      * parses though it and adds entries to our local storage object. Later that object
      * is iterated over and the nodes are populated onto the screen.
-     * @constructor
+     * @function
      */
     function parse_JSON(incoming_json){
         // makes JSON object parse-able
@@ -407,7 +408,6 @@ const App = () => {
                     >
                         {/* Dropdown Node Options */}
                         <TopBar {...props} />
-
                         {/* New Node Mapping */}
                         {nodes.map((node, i) => ( <Node
                                 {...nodeProps}
@@ -417,7 +417,6 @@ const App = () => {
                                 sidePos="middle"
                             />
                         ))}
-
                         {/* Add Node Popup Menu */}
                         <div className="form-popup" id="popup">
                             <div className="form-container" id="form">
