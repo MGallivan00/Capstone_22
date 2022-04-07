@@ -14,6 +14,11 @@ import {getAnalytics} from "firebase/analytics";
 import xarrow from "./components/Xarrow";
 
 // XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
+//
+// Other reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
+// and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+// and https://www.youtube.com/watch?v=Px4Lm8NixtE
+// and https://www.w3schools.com/jsref/jsref_foreach.asp
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -21,7 +26,6 @@ import xarrow from "./components/Xarrow";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
 const firebaseConfig = {
     apiKey: "AIzaSyALd8fTT_YORi0wwJ7bC_7O347ssGlItvg",
     authDomain: "capstone-pique.firebaseapp.com",
@@ -37,7 +41,7 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const database = getDatabase();
 
-
+// Possible Node Types
 const options = [
     {value:"tqi", label: 'TQI'},
     {value:"quality_aspects", label: 'Quality Aspects'},
@@ -45,9 +49,14 @@ const options = [
     {value:"measures", label: 'Measures'},
     {value:"diagnostics", label: 'Diagnostics'}];
 
+// Arrays for storing nodes and lines
 const storage = [];
 const childlines = [];
+
+// For formatting shapes
 const TYPE = ["node"];
+
+// Example of an exported node
 const model_object = {
     "factors": {
         "tqi": {},
@@ -58,6 +67,7 @@ const model_object = {
     "diagnostics": {}
 };
 
+// Example of a storage node
 const storage_object = {
     id:"",
     desc:"",
@@ -68,6 +78,7 @@ const storage_object = {
     y:500
 }
 
+// Load from preset variable for testing
 const JSON_preset = {
     "factors": {
         "tqi": {
@@ -262,8 +273,7 @@ const JSON_preset = {
 }
 
 const App = () => {
-    // with reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
-    // and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+
     let nodeName = "";
     let nodeDesc = "";
     let nodeType = "other";
@@ -276,6 +286,7 @@ const App = () => {
     const [selected, setSelected] = useState(null);
     const [actionState, setActionState] = useState("Normal");
 
+    // Handles Selected Nodes
     const handleSelect = (e) => {
         if (e === null) {
             setSelected(null);
@@ -283,15 +294,17 @@ const App = () => {
         } else setSelected({id: e.target.id, type: "node"});
     };
 
+    // Checks existence of nodes
     const checkExistence = (id) => {
         return [...nodes, ...interfaces].map((b) => b.id).includes(id);
     };
 
-    // from https://www.youtube.com/watch?v=Px4Lm8NixtE
+    // Get functions for Node properties
     function getName(prop){ nodeName = prop.target.value; }
     function getDesc(prop){ nodeDesc = prop.target.value; }
     function getType(prop){ nodeType = prop.value; }
 
+    // Handles Add-Node Drag and Drop Functionality
     const handleDropDynamic = (e) => {
         let l = nodes.length;
         let { x, y } = e.target.getBoundingClientRect();
@@ -306,11 +319,9 @@ const App = () => {
             desc: nodeDesc,
             type: nodeType,
             children: [],
-            x: e.clientX,
-            y: e.clientY - 100,
-            // x: 500,
-            // y: 500,
             // The x and y coordinates should be the location where the node is dropped, but it's not working?
+            x: 500,
+            y: 500,
             //x: e.clientX - x,
             //y: e.clientX - y,
             shape: object};
@@ -349,6 +360,7 @@ const App = () => {
         //console.log(JSON.stringify(model_object));
     }
 
+    // Shows node info to user
     function showInfo(selected) {
         openInfo();
         const index = storage.findIndex(item => {
@@ -362,6 +374,7 @@ const App = () => {
         type.innerHTML = storage[index].type.toString();
     }
 
+    // Prompts user for file name
     function nameFile(){
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
@@ -369,10 +382,7 @@ const App = () => {
         toJSON(fileName);
     }
 
-    function findNode(node){
-        return (node.id === this);
-    }
-
+    // Removes duplicate items in arraylist
     function clean(arr){
         let clean = [];
         arr.sort();
@@ -387,8 +397,12 @@ const App = () => {
         return clean;
     }
 
-    //https://www.w3schools.com/jsref/jsref_foreach.asp
-    //can add children but not delete them
+    // Finds a matching node
+    function findNode(node){
+        return (node.id === this);
+    }
+
+    // Adds children to the storage nodes to ensure links are accounted for //can add children but not delete them
     function addChildren(l){
         let child = l.props.end;
         let p = l.props.start;
@@ -399,6 +413,7 @@ const App = () => {
         console.log(storage);
     }
 
+    // Reads the loaded JSON as nested formatting
     function parse_JSON(){
         // makes JSON object parse-able
         const obj = JSON.parse(JSON.stringify(JSON_preset));
@@ -461,22 +476,17 @@ const App = () => {
             )
         }
     }
-/*
 
-    document.addEventListener('mouseup' , (event) => {
-     console.log(`Mouse X: ${event.clientX}, Mouse Y: ${event.clientY}`);
- });
-*/
-
+    // variables to remember number of each type of node passed to store_node_from_JSON
     let t;
     let c = 0;
     // Formats incoming JSON into the proper format for viewing on screen
-    // TODO: Parameters?
     function store_node_from_JSON(nodeName, nodeDesc, nodeType, nodeChildren){
         let object = TYPE[0];
         let nodewidth = nodeName.toString().length;
         let xpos, ypos;
 
+        // sets height of node by Type
         switch (nodeType){
             case "tqi":
                 ypos = 180;
@@ -494,17 +504,19 @@ const App = () => {
                 ypos = 660;
                 break;
         }
-
-        console.log(t + " : "  + nodeType)
+        //console.log(t + " : "  + nodeType)
         if(t !== nodeType){
             c = 0;
             t = nodeType;
         } else{
             c++;
         }
+        //sets x placement of node by number type already places
         //xpos = 850 + c*150*(Math.pow(-1, storage.length % 2)); //more centered
         xpos = 250 - nodewidth*3.2 + c*200; //left justified
-        console.log(nodeName + " Storage length: " + storage.length + " x: " + xpos + " y: " + ypos);
+        //console.log(nodeName + " Storage length: " + storage.length + " x: " + xpos + " y: " + ypos);
+
+        //creates the node from load
         let newNode = {
             id: nodeName,
             desc: nodeDesc,
@@ -561,6 +573,7 @@ const App = () => {
         //          };
     }
 
+    // Formats node array to JSON file formatting for export
     function toJSON(prop) {
         lines.forEach(addChildren);
         //JSON.stringify(model_object);
@@ -577,18 +590,19 @@ const App = () => {
         window.alert("JSON data is save to " + prop + ".json");
     }
 
+    // Displays info popup
     function openInfo() {
         document.getElementById("info").style.display = "block";
     }
-
+    // Hides info popup
     function closeInfo() {
         document.getElementById("info").style.display = "none";
     }
-
+    // Displays entry form popup
     function openForm() {
         document.getElementById("popup").style.display = "block";
     }
-
+    // Hides and resets entry form popup
     function closeForm() {
         document.getElementById("popup").style.display = "none";
         document.getElementById("inputName").value = "";
@@ -597,7 +611,8 @@ const App = () => {
         //document.getElementsByTagName("Select").defaultValue = {value: "other", label: 'Other'};
     }
 
-    //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
+    // Fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
+    // TODO: Maria does not know what this function is for
     function load_file() {
         let name = window.prompt("Enter file name ");
         const test = ref(database, name + '/');
@@ -607,6 +622,7 @@ const App = () => {
             {onlyOnce: true}
     }
 
+    // TODO: Maria does not know what this function is for
     function write_file() {
         let name = window.prompt("Enter the file name: ");
         set(ref(database, name + '/'), {
@@ -614,6 +630,7 @@ const App = () => {
         });
     }
 
+    // Properties
     const props = {
         interfaces,
         setInterfaces,
@@ -628,6 +645,7 @@ const App = () => {
         setLines
     };
 
+    // Node properties
     const nodeProps = {
         nodes,
         setNodes,
@@ -639,16 +657,17 @@ const App = () => {
         lines
     };
 
+    // HTML
     return (
         <div>
-            {/* Workable area needs to be wrapped in Xwrapper so xarrows dynamically re-renders */}
+            {/* Workable area needs to be wrapped in Xwrapper so Xarrows dynamically re-render */}
             <Xwrapper>
                 {/* Root Canvas */}
                 <div
                     className="canvasStyle"
                     id="canvas"
                     onClick={() => handleSelect(null)} >
-                    {/* Drag and Drop Tool Bar*/}
+                    {/* Drag and Drop Tool Box*/}
                     <div className="toolboxMenu">
                         {TYPE.map((shapeName) => (
                             <div
@@ -683,7 +702,7 @@ const App = () => {
                             />
                         ))}
 
-                        {/* Add Node Popup Menu */}
+                        {/* Add-Node Popup Menu */}
                         <div className="form-popup" id="popup">
                             <div className="form-container" id="form">
                                 <h2>Input Node Info</h2>
@@ -746,7 +765,7 @@ const App = () => {
                             setSelected={setSelected}
                         />
                     ))}
-                    {/* Xarrow connections for loading preset */}
+                    {/* Xarrow Connections for Loading Preset */}
                     {childlines.map((line, i) => (
                         <Xarrow
                             key={line.props.start + "-" + line.props.end + i}
