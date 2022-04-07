@@ -262,7 +262,7 @@ const App = () => {
                     for (const name in qa_type) {
                         store_node_from_JSON(
                             name,
-                            qa_type[name].descriptionHomestuck,
+                            qa_type[name].description,
                             factor,
                             qa_type[name].children
                         )
