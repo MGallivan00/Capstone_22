@@ -13,6 +13,12 @@ import Select from 'react-select'; //https://react-select.com/home
 import '@szhsin/react-menu/dist/index.css';
 
 // Developed with code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
+// XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
+//
+// Other reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
+// and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+// and https://www.youtube.com/watch?v=Px4Lm8NixtE
+// and https://www.w3schools.com/jsref/jsref_foreach.asp
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -31,12 +37,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const
-    app = initializeApp(firebaseConfig),
-    analytics = getAnalytics(app),
-    database = getDatabase();
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const database = getDatabase();
 
-
+// Possible Node Types
 const options = [
     {value:"tqi", label: 'TQI'},
     {value:"quality_aspects", label: 'Quality Aspects'},
@@ -56,6 +61,228 @@ const
         "measures": {},
         "diagnostics": {}
     };
+// Arrays for storing nodes and lines
+const storage = [];
+const childlines = [];
+
+// For formatting shapes
+const TYPE = ["node"];
+
+// Example of an exported node
+const model_object = {
+    "factors": {
+        "tqi": {},
+        "quality_aspects": {},
+        "product_factors": {}
+    },
+    "measures": {},
+    "diagnostics": {}
+};
+
+// Example of a storage node
+const storage_object = {
+    id:"",
+    desc:"",
+    type:"",
+    children:[],
+    shape:"node",
+    x: 500,
+    y:500
+}
+
+// Load from preset variable for testing
+const JSON_preset = {
+    "factors": {
+        "tqi": {
+            "TQI": {
+                "description": "Total software quality",
+                "children": {
+                    "QualityAspect 01": {
+
+                    },
+                    "QualityAspect 02": {
+
+                    },
+                    "QualityAspect 03": {
+
+                    },
+                    "QualityAspect 04": {
+
+                    }
+                }
+            }
+        },
+        "quality_aspects": {
+            "QualityAspect 01": {
+                "description": "Performance",
+                "children": {
+                    "ProductFactor 01": {
+
+                    }
+                }
+            },
+            "QualityAspect 02": {
+                "description": "Compatibility",
+                "children": {
+                    "ProductFactor 02": {
+
+                    }
+                }
+            },
+            "QualityAspect 03": {
+                "description": "Maintainability",
+                "children": {
+                    "ProductFactor 03": {
+
+                    },
+                    "ProductFactor 04": {
+
+                    }
+                }
+            },
+            "QualityAspect 04": {
+                "description": "Security",
+                "children": {
+                    "ProductFactor 05": {
+
+                    },
+                    "ProductFactor 06": {
+
+                    }
+                }
+            }
+        },
+        "product_factors": {
+            "ProductFactor 01": {
+                "description": "Runtime",
+                "children": {
+                    "Measure 02": {
+
+                    }
+                }
+            },
+            "ProductFactor 02": {
+                "description": "Interoperability",
+                "children": {
+                    "Measure 03": {
+
+                    }
+                }
+            },
+            "ProductFactor 03": {
+                "description": "Modifiability",
+                "children": {
+                    "Measure 01": {
+
+                    },
+                    "Measure 04": {
+
+                    }
+                }
+            },
+            "ProductFactor 04": {
+                "description": "Reusability",
+                "children": {
+                    "Measure 02": {
+
+                    },
+                    "Measure 04": {
+
+                    }
+                }
+            },
+            "ProductFactor 05": {
+                "description": "Confidentiality",
+                "children": {
+                    "Measure 03": {
+
+                    }
+                }
+            },
+            "ProductFactor 06": {
+                "description": "Integrity",
+                "children": {
+                    "Measure 02": {
+
+                    },
+                    "Measure 04": {
+
+                    }
+                }
+            }
+        }
+    },
+    "measures": {
+        "Measure 01": {
+            "description": "Formatting",
+            "positive": false,
+            "children": {
+                "RCS1036": {
+
+                }
+            }
+        },
+        "Measure 02": {
+            "description": "Unused variable",
+            "positive": false,
+            "children": {
+                "CS0649": {
+
+                },
+                "RCS1163": {
+
+                },
+                "RCS1213": {
+
+                }
+            }
+        },
+        "Measure 03": {
+            "description": "Certifications",
+            "positive": false,
+            "children": {
+                "SCS0004": {
+
+                }
+            }
+        },
+        "Measure 04": {
+            "description": "Naming",
+            "positive": false,
+            "children": {
+                "VSTHRD200": {
+
+                }
+            }
+        }
+    },
+    "diagnostics": {
+        "CS0649": {
+            "description": "Field is never assigned to, and will always have its default value",
+            "toolName": "Roslynator"
+        },
+        "RCS1036": {
+            "description": "Remove redundant empty line",
+            "toolName": "Roslynator"
+        },
+        "RCS1163": {
+            "description": "Unused parameter",
+            "toolName": "Roslynator"
+        },
+        "RCS1213": {
+            "description": "Remove unused member declaration",
+            "toolName": "Roslynator"
+        },
+        "SCS0004": {
+            "description": "Certificate Validation has been disabled",
+            "toolName": "Roslynator"
+        },
+        "VSTHRD200": {
+            "description": "Use &quot;Async&quot; suffix for async methods",
+            "toolName": "Roslynator"
+        }
+    }
+}
 
 const App = () => {
     // with reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
@@ -72,6 +299,7 @@ const App = () => {
         [selected, setSelected] = useState(null),
         [actionState, setActionState] = useState("Normal");
 
+    // Handles Selected Nodes
     const handleSelect = (e) => {
         if (e === null) {
             setSelected(null);
@@ -79,15 +307,17 @@ const App = () => {
         } else setSelected({id: e.target.id, type: "node"});
     };
 
+    // Checks existence of nodes
     const checkExistence = (id) => {
         return [...nodes, ...interfaces].map((b) => b.id).includes(id);
     };
 
-    // from https://www.youtube.com/watch?v=Px4Lm8NixtE
+    // Get functions for Node properties
     function getName(prop){ nodeName = prop.target.value; }
     function getDesc(prop){ nodeDesc = prop.target.value; }
     function getType(prop){ nodeType = prop.value; }
 
+    // Handles Add-Node Drag and Drop Functionality
     const handleDropDynamic = (e) => {
         let l = nodes.length;
         let { x, y } = e.target.getBoundingClientRect();
@@ -102,6 +332,7 @@ const App = () => {
             desc: nodeDesc,
             type: nodeType,
             children: [],
+            // The x and y coordinates should be the location where the node is dropped, but it's not working?
             x: 500,
             y: 500,
             // The x and y coordinates should be the location where the node is dropped, but it's not working?
@@ -139,7 +370,7 @@ const App = () => {
                 model_object.diagnostics[nodeName].description = nodeDesc;
                 break;
         }
-        console.log(JSON.stringify(model_object));
+        //console.log(JSON.stringify(model_object));
     }
 
     /**
@@ -159,6 +390,7 @@ const App = () => {
         type.innerHTML = storage[index].type.toString();
     }
 
+    // Prompts user for file name
     function nameFile(){
         // TODO: Read from JSON file and store into local variable. Pass that variable to parse_JSON()
         parse_JSON();
@@ -299,32 +531,132 @@ const App = () => {
         }
     }
 
+    // variables to remember number of each type of node passed to store_node_from_JSON
+    let t;
+    let c = 0;
     // Formats incoming JSON into the proper format for viewing on screen
     function store_node_from_JSON(nodeName, nodeDesc, nodeType, nodeChildren){
         let object = TYPE[0];
+        let nodewidth = nodeName.toString().length;
+        let xpos, ypos;
+
+        // sets height of node by Type
+        switch (nodeType){
+            case "tqi":
+                ypos = 180;
+                break;
+            case "quality_aspects":
+                ypos = 300;
+                break;
+            case "product_factors":
+                ypos = 420;
+                break;
+            case "measures":
+                ypos = 540;
+                break;
+            case "diagnostics":
+                ypos = 660;
+                break;
+        }
+        //console.log(t + " : "  + nodeType)
+        if(t !== nodeType){
+            c = 0;
+            t = nodeType;
+        } else{
+            c++;
+        }
+        //sets x placement of node by number type already places
+        //xpos = 850 + c*150*(Math.pow(-1, storage.length % 2)); //more centered
+        xpos = 250 - nodewidth*3.2 + c*200; //left justified
+        //console.log(nodeName + " Storage length: " + storage.length + " x: " + xpos + " y: " + ypos);
+
+        //creates the node from load
         let newNode = {
             id: nodeName,
             desc: nodeDesc,
             type: nodeType,
             children: nodeChildren,
+            x: xpos,
+            y: ypos,
             shape: object};
         setNodes([...nodes, newNode]);
         storage.push(newNode);
-        console.log(storage);
+        //console.log(storage);
+        for (let k in nodeChildren) {
+            let p = {props: {start: nodeName, end: k}};
+            //console.log(p);
+            setLines([...lines, p]);
+            childlines.push(p);
+        }
+
     }
 
+    // Formats entries into the proper nested format before writing to file
+    function save_format(arr){
+        let format = [];
+        for (const o in options) {
+            //output = key: value;
+            // key == options[o].label
+            // value == entryArr
+            //         entry key = nodeName; value = info
+            //                                       info == {desc: "", child: []}
+
+            let entryArr = []; // array of {[nodeName] : info} in a specific classification
+            let optionArr = arr.filter(a => a.type === options[o].value);
+            console.log(optionArr);
+            optionArr.sort((x, y) => (x.id > y.id) ? 1 : -1);
+            for (const n in optionArr) {
+                let node = optionArr[n];
+                let entryKey = node.id;
+                let entryValue = {description: node.desc, children: node.children}
+                let entry = {[entryKey]: entryValue};
+                entryArr.push(entry);
+            }
+            console.log(entryArr);
+            let org = {[options[o].label]: entryArr};
+            console.log(org);
+            format.push(org);
+            format.sort();
+        }
+        return format;
+        //format will have 5 keys: each of the options.label
+        //format = { [nodeType]:
+        //                      [ {[nodeName]:
+        //                                      {desc: nodeDesc, children: []}
+        //                         }]
+        //          };
+    }
+
+    // Formats node array to JSON file formatting for export
+    function toJSON(prop) {
+        lines.forEach(addChildren);
+        //JSON.stringify(model_object);
+        let s = save_format(storage);
+        //const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
+        const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.download = (prop + ".txt");
+        a.href = URL.createObjectURL(data);
+        a.addEventListener('click', (e) => {
+            setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
+        });
+        a.click();
+        window.alert("JSON data is save to " + prop + ".json");
+    }
+
+    // Displays info popup
     function openInfo() {
         document.getElementById("info").style.display = "block";
     }
-
+    // Hides info popup
     function closeInfo() {
         document.getElementById("info").style.display = "none";
     }
-
+    // Displays entry form popup
     function openForm() {
         document.getElementById("popup").style.display = "block";
     }
-
+    // Hides and resets entry form popup
     function closeForm() {
         document.getElementById("popup").style.display = "none";
         document.getElementById("inputName").value = "";
@@ -333,7 +665,8 @@ const App = () => {
         //document.getElementsByTagName("Select").defaultValue = {value: "other", label: 'Other'};
     }
 
-    //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
+    // Fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
+    // TODO: Maria does not know what this function is for
     function load_file() {
         let name = window.prompt("Enter file name ");
         const test = ref(database, name + '/');
@@ -343,6 +676,7 @@ const App = () => {
             {onlyOnce: true}
     }
 
+    // TODO: Maria does not know what this function is for
     function write_file() {
         let name = window.prompt("Enter the file name: ");
         set(ref(database, name + '/'), {
@@ -350,6 +684,7 @@ const App = () => {
         });
     }
 
+    // Properties
     const props = {
         interfaces,
         setInterfaces,
@@ -364,6 +699,7 @@ const App = () => {
         setLines
     };
 
+    // Node properties
     const nodeProps = {
         nodes,
         setNodes,
@@ -375,16 +711,17 @@ const App = () => {
         lines
     };
 
+    // HTML
     return (
         <div>
-            {/* Workable area needs to be wrapped in Xwrapper so xarrows dynamically re-renders */}
+            {/* Workable area needs to be wrapped in Xwrapper so Xarrows dynamically re-render */}
             <Xwrapper>
                 {/* Root Canvas */}
                 <div
                     className="canvasStyle"
                     id="canvas"
                     onClick={() => handleSelect(null)} >
-                    {/* Drag and Drop Tool Bar*/}
+                    {/* Drag and Drop Tool Box*/}
                     <div className="toolboxMenu">
                         {TYPE.map((shapeName) => (
                             <div
@@ -409,7 +746,7 @@ const App = () => {
                         {/* Dropdown Node Options */}
                         <TopBar {...props} />
                         {/* New Node Mapping */}
-                        {nodes.map((node, i) => ( <Node
+                        {storage.map((node, i) => ( <Node
                                 {...nodeProps}
                                 key={i} // this seems to be the way to make sure every child has a unique id in a list
                                 box={node}
@@ -478,6 +815,15 @@ const App = () => {
                             line={line}
                             selected={selected}
                             setSelected={setSelected}
+                        />
+                    ))}
+                    {/* Xarrow Connections for Loading Preset */}
+                    {childlines.map((line, i) => (
+                        <Xarrow
+                            key={line.props.start + "-" + line.props.end + i}
+                            line={line}
+                            start={line.props.start}
+                            end={line.props.end}
                         />
                     ))}
                 </div>
