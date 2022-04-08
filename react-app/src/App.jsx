@@ -4,21 +4,25 @@ import Node from "./components/Node";
 import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
-import {Button} from 'react-floating-action-button'
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
 import {getDatabase, onValue, ref, set} from "firebase/database";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
-import Select from 'react-select'; //https://react-select.com/home
+import {Button} from 'react-floating-action-button'
+import Select from 'react-select';
 import '@szhsin/react-menu/dist/index.css';
 
-// Developed with code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
-// XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
-//
-// Other reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
-// and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
-// and https://www.youtube.com/watch?v=Px4Lm8NixtE
-// and https://www.w3schools.com/jsref/jsref_foreach.asp
+/* Developed with code forked from:
+ * https://github.com/Eliav2/react-xarrows/tree/master/examples
+ */
+
+/* References:
+ * https://www.w3schools.com/jsref/jsref_foreach.asp
+ * https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
+ * https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+ * https://www.youtube.com/watch?v=Px4Lm8NixtE
+ * https://react-select.com/home
+ */
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -37,9 +41,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const database = getDatabase();
+const
+    app = initializeApp(firebaseConfig),
+    analytics = getAnalytics(app),
+    database = getDatabase();
 
 // Possible Node Types
 const options = [
@@ -50,8 +55,12 @@ const options = [
     {value:"diagnostics", label: 'Diagnostics'}];
 
 const
+    // Arrays for storing nodes and lines
     storage = [],
+    childlines = [],
+    // For formatting shapes
     TYPE = ["node"],
+    // Example of an exported node
     model_object = {
         "factors": {
             "tqi": {},
@@ -61,34 +70,6 @@ const
         "measures": {},
         "diagnostics": {}
     };
-// Arrays for storing nodes and lines
-const storage = [];
-const childlines = [];
-
-// For formatting shapes
-const TYPE = ["node"];
-
-// Example of an exported node
-const model_object = {
-    "factors": {
-        "tqi": {},
-        "quality_aspects": {},
-        "product_factors": {}
-    },
-    "measures": {},
-    "diagnostics": {}
-};
-
-// Example of a storage node
-const storage_object = {
-    id:"",
-    desc:"",
-    type:"",
-    children:[],
-    shape:"node",
-    x: 500,
-    y:500
-}
 
 // Load from preset variable for testing
 const JSON_preset = {
@@ -285,8 +266,10 @@ const JSON_preset = {
 }
 
 const App = () => {
-    // with reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
-    // and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+    /* References:
+     * https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
+     * https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+     */
     let
         nodeName = "",
         nodeDesc = "",
@@ -317,7 +300,12 @@ const App = () => {
     function getDesc(prop){ nodeDesc = prop.target.value; }
     function getType(prop){ nodeType = prop.value; }
 
-    // Handles Add-Node Drag and Drop Functionality
+    /**
+     * Handles node drag-drop functionality. Pushes node information into an entry on the local "storage"
+     * array. In addition, when a node is added a properly formatted JSON object is pushed onto the "model_object"
+     * that is used in exporting to a JSON file.
+     * @const
+     */
     const handleDropDynamic = (e) => {
         let l = nodes.length;
         let { x, y } = e.target.getBoundingClientRect();
@@ -332,7 +320,6 @@ const App = () => {
             desc: nodeDesc,
             type: nodeType,
             children: [],
-            // The x and y coordinates should be the location where the node is dropped, but it's not working?
             x: 500,
             y: 500,
             // The x and y coordinates should be the location where the node is dropped, but it's not working?
@@ -368,9 +355,9 @@ const App = () => {
             case "diagnostics":
                 model_object.diagnostics[nodeName] = {};
                 model_object.diagnostics[nodeName].description = nodeDesc;
+                // Dia
                 break;
         }
-        //console.log(JSON.stringify(model_object));
     }
 
     /**
@@ -392,8 +379,7 @@ const App = () => {
 
     // Prompts user for file name
     function nameFile(){
-        // TODO: Read from JSON file and store into local variable. Pass that variable to parse_JSON()
-        parse_JSON();
+        parse_JSON(JSON_preset);
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t)
@@ -451,7 +437,7 @@ const App = () => {
 
     function toJSON(prop) {
         lines.forEach(addChildren);
-        console.log(JSON.stringify(model_object));
+        // console.log(JSON.stringify(model_object));
         const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
         const a = document.createElement('a');
         a.download = (prop + ".json");
@@ -591,59 +577,6 @@ const App = () => {
 
     }
 
-    // Formats entries into the proper nested format before writing to file
-    function save_format(arr){
-        let format = [];
-        for (const o in options) {
-            //output = key: value;
-            // key == options[o].label
-            // value == entryArr
-            //         entry key = nodeName; value = info
-            //                                       info == {desc: "", child: []}
-
-            let entryArr = []; // array of {[nodeName] : info} in a specific classification
-            let optionArr = arr.filter(a => a.type === options[o].value);
-            console.log(optionArr);
-            optionArr.sort((x, y) => (x.id > y.id) ? 1 : -1);
-            for (const n in optionArr) {
-                let node = optionArr[n];
-                let entryKey = node.id;
-                let entryValue = {description: node.desc, children: node.children}
-                let entry = {[entryKey]: entryValue};
-                entryArr.push(entry);
-            }
-            console.log(entryArr);
-            let org = {[options[o].label]: entryArr};
-            console.log(org);
-            format.push(org);
-            format.sort();
-        }
-        return format;
-        //format will have 5 keys: each of the options.label
-        //format = { [nodeType]:
-        //                      [ {[nodeName]:
-        //                                      {desc: nodeDesc, children: []}
-        //                         }]
-        //          };
-    }
-
-    // Formats node array to JSON file formatting for export
-    function toJSON(prop) {
-        lines.forEach(addChildren);
-        //JSON.stringify(model_object);
-        let s = save_format(storage);
-        //const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
-        const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
-        const a = document.createElement('a');
-        a.download = (prop + ".txt");
-        a.href = URL.createObjectURL(data);
-        a.addEventListener('click', (e) => {
-            setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
-        });
-        a.click();
-        window.alert("JSON data is save to " + prop + ".json");
-    }
-
     // Displays info popup
     function openInfo() {
         document.getElementById("info").style.display = "block";
@@ -661,7 +594,7 @@ const App = () => {
         document.getElementById("popup").style.display = "none";
         document.getElementById("inputName").value = "";
         document.getElementById("inputDesc").value = "";
-        //i just don't know why it won't reset like inputName and Desc
+        //I just don't know why it won't reset like inputName and Desc
         //document.getElementsByTagName("Select").defaultValue = {value: "other", label: 'Other'};
     }
 
@@ -769,7 +702,7 @@ const App = () => {
                                        id="inputDesc"
                                        onChange={getDesc}/>
                                 <b>Classification</b>
-                                {/* diagnostic, measures, product_factors, quality_aspects, tqi*/}
+                                {/*tqi, quality_aspects, product_factors, measures, diagnostics*/}
                                 {/* drop-down messed up for showing values or resetting value*/}
                                 <Select id="inputType" options={options} value={"Other"} onChange={getType} />
                                 {/* Submission Button */}
@@ -803,12 +736,13 @@ const App = () => {
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
-                                </SubMenu><MenuItem onClick={write_file}>database</MenuItem>
+                                {/* TODO: What is the database button supposed to do? */}
+                                </SubMenu><MenuItem onClick={write_file}>Database</MenuItem>
                                     <MenuItem>Export</MenuItem></>}
                             </Menu>
                         </div>
                     </div>
-                    {/* Xarrow Connections*/}
+                    {/* Xarrow Connections for Building New Models */}
                     {lines.map((line, i) => (
                         <Xarrow
                             key={line.props.root + "-" + line.props.end + i}
@@ -817,7 +751,7 @@ const App = () => {
                             setSelected={setSelected}
                         />
                     ))}
-                    {/* Xarrow Connections for Loading Preset */}
+                    {/* Xarrow Connections for Loading Preset and Existing Models */}
                     {childlines.map((line, i) => (
                         <Xarrow
                             key={line.props.start + "-" + line.props.end + i}
