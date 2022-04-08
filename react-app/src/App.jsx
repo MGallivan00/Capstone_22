@@ -4,21 +4,25 @@ import Node from "./components/Node";
 import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
-import {Button} from 'react-floating-action-button'
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
-import '@szhsin/react-menu/dist/index.css';
-import Select from 'react-select'; //https://react-select.com/home
 import {getDatabase, onValue, ref, set} from "firebase/database";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
-import xarrow from "./components/Xarrow";
+import {Button} from 'react-floating-action-button'
+import Select from 'react-select';
+import '@szhsin/react-menu/dist/index.css';
 
-// XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
-//
-// Other reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
-// and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
-// and https://www.youtube.com/watch?v=Px4Lm8NixtE
-// and https://www.w3schools.com/jsref/jsref_foreach.asp
+/* Developed with code forked from:
+ * https://github.com/Eliav2/react-xarrows/tree/master/examples
+ */
+
+/* References:
+ * https://www.w3schools.com/jsref/jsref_foreach.asp
+ * https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
+ * https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+ * https://www.youtube.com/watch?v=Px4Lm8NixtE
+ * https://react-select.com/home
+ */
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -37,9 +41,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const database = getDatabase();
+const
+    app = initializeApp(firebaseConfig),
+    analytics = getAnalytics(app),
+    database = getDatabase();
 
 // Possible Node Types
 const options = [
@@ -49,34 +54,22 @@ const options = [
     {value:"measures", label: 'Measures'},
     {value:"diagnostics", label: 'Diagnostics'}];
 
-// Arrays for storing nodes and lines
-const storage = [];
-const childlines = [];
-
-// For formatting shapes
-const TYPE = ["node"];
-
-// Example of an exported node
-const model_object = {
-    "factors": {
-        "tqi": {},
-        "quality_aspects": {},
-        "product_factors": {}
-    },
-    "measures": {},
-    "diagnostics": {}
-};
-
-// Example of a storage node
-const storage_object = {
-    id:"",
-    desc:"",
-    type:"",
-    children:[],
-    shape:"node",
-    x: 500,
-    y:500
-}
+const
+    // Arrays for storing nodes and lines
+    storage = [],
+    childlines = [],
+    // For formatting shapes
+    TYPE = ["node"],
+    // Example of an exported node
+    model_object = {
+        "factors": {
+            "tqi": {},
+            "quality_aspects": {},
+            "product_factors": {}
+        },
+        "measures": {},
+        "diagnostics": {}
+    };
 
 // Load from preset variable for testing
 const JSON_preset = {
@@ -273,18 +266,21 @@ const JSON_preset = {
 }
 
 const App = () => {
+    /* References:
+     * https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
+     * https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+     */
+    let
+        nodeName = "",
+        nodeDesc = "",
+        nodeType = "other";
 
-    let nodeName = "";
-    let nodeDesc = "";
-    let nodeType = "other";
-
-    const [interfaces, setInterfaces] = useState([]);
-
-    const [nodes, setNodes] = useState([]);
-    const [lines, setLines] = useState([]);
-
-    const [selected, setSelected] = useState(null);
-    const [actionState, setActionState] = useState("Normal");
+    const
+        [interfaces, setInterfaces] = useState([]),
+        [nodes, setNodes] = useState([]),
+        [lines, setLines] = useState([]),
+        [selected, setSelected] = useState(null),
+        [actionState, setActionState] = useState("Normal");
 
     // Handles Selected Nodes
     const handleSelect = (e) => {
@@ -304,7 +300,12 @@ const App = () => {
     function getDesc(prop){ nodeDesc = prop.target.value; }
     function getType(prop){ nodeType = prop.value; }
 
-    // Handles Add-Node Drag and Drop Functionality
+    /**
+     * Handles node drag-drop functionality. Pushes node information into an entry on the local "storage"
+     * array. In addition, when a node is added a properly formatted JSON object is pushed onto the "model_object"
+     * that is used in exporting to a JSON file.
+     * @const
+     */
     const handleDropDynamic = (e) => {
         let l = nodes.length;
         let { x, y } = e.target.getBoundingClientRect();
@@ -319,11 +320,11 @@ const App = () => {
             desc: nodeDesc,
             type: nodeType,
             children: [],
-            // The x and y coordinates should be the location where the node is dropped, but it's not working?
             x: 500,
             y: 500,
-            //x: e.clientX - x,
-            //y: e.clientX - y,
+            // The x and y coordinates should be the location where the node is dropped, but it's not working?
+            // x: e.clientX - x,
+            // y: e.clientY - y,
             shape: object};
         setNodes([...nodes, newNode]);
         storage.push(newNode);
@@ -334,33 +335,35 @@ const App = () => {
             case "tqi":
                 model_object.factors.tqi[nodeName] = {};
                 model_object.factors.tqi[nodeName].description = nodeDesc;
-                model_object.factors.tqi[nodeName].children = [];
+                model_object.factors.tqi[nodeName].children = {};
                 break;
             case "quality_aspects":
                 model_object.factors.quality_aspects[nodeName] = {};
                 model_object.factors.quality_aspects[nodeName].description = nodeDesc;
-                model_object.factors.quality_aspects[nodeName].children = [];
+                model_object.factors.quality_aspects[nodeName].children = {};
                 break;
             case "product_factors":
                 model_object.factors.product_factors[nodeName] = {};
                 model_object.factors.product_factors[nodeName].description = nodeDesc;
-                model_object.factors.product_factors[nodeName].children = [];
+                model_object.factors.product_factors[nodeName].children = {};
                 break;
             case "measures":
                 model_object.measures[nodeName] = {};
                 model_object.measures[nodeName].description = nodeDesc;
-                model_object.factors.measures[nodeName].children = [];
+                model_object.measures[nodeName].children = {};
                 break;
             case "diagnostics":
                 model_object.diagnostics[nodeName] = {};
                 model_object.diagnostics[nodeName].description = nodeDesc;
-                model_object.factors.diagnostics[nodeName].children = [];
+                // Dia
                 break;
         }
-        //console.log(JSON.stringify(model_object));
     }
 
-    // Shows node info to user
+    /**
+     * Grabs the selected node information and manipulates the HTML to display the current node info
+     * @function
+     */
     function showInfo(selected) {
         openInfo();
         const index = storage.findIndex(item => {
@@ -376,47 +379,85 @@ const App = () => {
 
     // Prompts user for file name
     function nameFile(){
+        parse_JSON(JSON_preset);
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t)
         toJSON(fileName);
     }
 
-    // Removes duplicate items in arraylist
-    function clean(arr){
-        let clean = [];
-        arr.sort();
-        let i = 0;
-        clean.push(arr[i]);
-        for (let j = 1; j < arr.length; j++){
-            if(arr[j] !== arr[i]){
-                clean.push(arr[j]);
-                i = j;
+    /**
+     * As nodes are added to the screen, they are added into the existing global JSON "model object",
+     * however, the children cannot be added to the model object until after the nodes are defined.
+     * This function parses the model object with the parent key name in hand and adds the child name
+     * to the parent - children structure.
+     * @function
+     */
+    function addChildren(l){
+        let parent = l.props.start,
+            child = l.props.end;
+        const obj = JSON.parse(JSON.stringify(model_object)),
+            factors = obj.factors,
+            measures = obj.measures;
+        for (let factor in factors){
+            switch(factor) {
+                case "tqi":
+                    let tqi_type = factors.tqi;
+                    for (const name in tqi_type) {
+                        if (name === parent) {
+                            model_object.factors.tqi[parent].children[child] = {};
+                        }
+                    }
+                    break;
+                case "quality_aspects":
+                    let qa_type = factors.quality_aspects;
+                    for (const name in qa_type) {
+                        if (name === parent) {
+                            model_object.factors.quality_aspects[parent].children[child] = {};
+                        }
+                    }
+                    break;
+                case "product_factors":
+                    let pf_type = factors.product_factors;
+                    for (const name in pf_type) {
+                        if (name === parent) {
+                            model_object.factors.product_factors[parent].children[child] = {};
+                        }
+                    }
+                    break;
             }
         }
-        return clean;
+        for (let name in measures) {
+            if (name === parent) {
+                model_object.measures[parent].children[child] = {};
+            }
+        }
+        // Diagnostic type nodes don't have children, so we don't need to worry about those.
     }
 
-    // Finds a matching node
-    function findNode(node){
-        return (node.id === this);
+    function toJSON(prop) {
+        lines.forEach(addChildren);
+        // console.log(JSON.stringify(model_object));
+        const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.download = (prop + ".json");
+        a.href = URL.createObjectURL(data);
+        a.addEventListener('click', (e) => {
+            setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
+        });
+        a.click();
+        window.alert("JSON data is save to " + prop + ".json");
     }
 
-    // Adds children to the storage nodes to ensure links are accounted for //can add children but not delete them
-    function addChildren(l){
-        let child = l.props.end;
-        let p = l.props.start;
-        let parent = storage.find(findNode, p);
-        console.log(parent.children);
-        (parent.children).push(child);
-        parent.children = clean(parent.children);
-        console.log(storage);
-    }
-
-    // Reads the loaded JSON as nested formatting
-    function parse_JSON(){
+    /**
+     * Takes the incoming JSON file that needs to be stored into a JSON object locally,
+     * parses though it and adds entries to our local storage object. Later that object
+     * is iterated over and the nodes are populated onto the screen.
+     * @function
+     */
+    function parse_JSON(incoming_json){
         // makes JSON object parse-able
-        const obj = JSON.parse(JSON.stringify(JSON_preset));
+        const obj = JSON.parse(JSON.stringify(incoming_json));
         const
             factors = obj.factors,
             measures = obj.measures,
@@ -436,18 +477,17 @@ const App = () => {
                     break;
                 case "quality_aspects":
                     let qa_type = factors.quality_aspects;
-                    // let entries = [];
                     for (const name in qa_type) {
                         store_node_from_JSON(
                             name,
                             qa_type[name].description,
                             factor,
                             qa_type[name].children
-                        )}
+                        )
+                    }
                     break;
                 case "product_factors":
                     let pf_type = factors.product_factors;
-                    // let entries = [];
                     for (const name in pf_type) {
                         store_node_from_JSON(
                             name,
@@ -537,59 +577,6 @@ const App = () => {
 
     }
 
-    // Formats entries into the proper nested format before writing to file
-    function save_format(arr){
-        let format = [];
-        for (const o in options) {
-            //output = key: value;
-            // key == options[o].label
-            // value == entryArr
-            //         entry key = nodeName; value = info
-            //                                       info == {desc: "", child: []}
-
-            let entryArr = []; // array of {[nodeName] : info} in a specific classification
-            let optionArr = arr.filter(a => a.type === options[o].value);
-            console.log(optionArr);
-            optionArr.sort((x, y) => (x.id > y.id) ? 1 : -1);
-            for (const n in optionArr) {
-                let node = optionArr[n];
-                let entryKey = node.id;
-                let entryValue = {description: node.desc, children: node.children}
-                let entry = {[entryKey]: entryValue};
-                entryArr.push(entry);
-            }
-            console.log(entryArr);
-            let org = {[options[o].label]: entryArr};
-            console.log(org);
-            format.push(org);
-            format.sort();
-        }
-        return format;
-        //format will have 5 keys: each of the options.label
-        //format = { [nodeType]:
-        //                      [ {[nodeName]:
-        //                                      {desc: nodeDesc, children: []}
-        //                         }]
-        //          };
-    }
-
-    // Formats node array to JSON file formatting for export
-    function toJSON(prop) {
-        lines.forEach(addChildren);
-        //JSON.stringify(model_object);
-        let s = save_format(storage);
-        //const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
-        const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
-        const a = document.createElement('a');
-        a.download = (prop + ".txt");
-        a.href = URL.createObjectURL(data);
-        a.addEventListener('click', (e) => {
-            setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
-        });
-        a.click();
-        window.alert("JSON data is save to " + prop + ".json");
-    }
-
     // Displays info popup
     function openInfo() {
         document.getElementById("info").style.display = "block";
@@ -607,7 +594,7 @@ const App = () => {
         document.getElementById("popup").style.display = "none";
         document.getElementById("inputName").value = "";
         document.getElementById("inputDesc").value = "";
-        //i just don't know why it won't reset like inputName and Desc
+        //I just don't know why it won't reset like inputName and Desc
         //document.getElementsByTagName("Select").defaultValue = {value: "other", label: 'Other'};
     }
 
@@ -691,7 +678,6 @@ const App = () => {
                     >
                         {/* Dropdown Node Options */}
                         <TopBar {...props} />
-
                         {/* New Node Mapping */}
                         {storage.map((node, i) => ( <Node
                                 {...nodeProps}
@@ -701,8 +687,7 @@ const App = () => {
                                 sidePos="middle"
                             />
                         ))}
-
-                        {/* Add-Node Popup Menu */}
+                        {/* Add Node Popup Menu */}
                         <div className="form-popup" id="popup">
                             <div className="form-container" id="form">
                                 <h2>Input Node Info</h2>
@@ -717,7 +702,7 @@ const App = () => {
                                        id="inputDesc"
                                        onChange={getDesc}/>
                                 <b>Classification</b>
-                                {/* diagnostic, measures, product_factors, quality_aspects, tqi*/}
+                                {/*tqi, quality_aspects, product_factors, measures, diagnostics*/}
                                 {/* drop-down messed up for showing values or resetting value*/}
                                 <Select id="inputType" options={options} value={"Other"} onChange={getType} />
                                 {/* Submission Button */}
@@ -749,14 +734,15 @@ const App = () => {
                                 <MenuItem>Load</MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
-                                    <MenuItem id="csharp" value="test" onClick={parse_JSON}>Csharp Model</MenuItem>
-                                    <MenuItem id="bin" value="test" onClick={parse_JSON}> Bin Model</MenuItem>
-                                </SubMenu><MenuItem onClick={write_file}>database</MenuItem>
+                                    <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
+                                    <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
+                                {/* TODO: What is the database button supposed to do? */}
+                                </SubMenu><MenuItem onClick={write_file}>Database</MenuItem>
                                     <MenuItem>Export</MenuItem></>}
                             </Menu>
                         </div>
                     </div>
-                    {/* Xarrow Connections*/}
+                    {/* Xarrow Connections for Building New Models */}
                     {lines.map((line, i) => (
                         <Xarrow
                             key={line.props.root + "-" + line.props.end + i}
@@ -765,7 +751,7 @@ const App = () => {
                             setSelected={setSelected}
                         />
                     ))}
-                    {/* Xarrow Connections for Loading Preset */}
+                    {/* Xarrow Connections for Loading Preset and Existing Models */}
                     {childlines.map((line, i) => (
                         <Xarrow
                             key={line.props.start + "-" + line.props.end + i}
