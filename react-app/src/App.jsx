@@ -746,13 +746,12 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem>Load</MenuItem>
+                                <MenuItem onClick={load_file}>Load</MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={parse_JSON}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={parse_JSON}> Bin Model</MenuItem>
-                                </SubMenu><MenuItem onClick={write_file}>database</MenuItem>
-                                    <MenuItem>Export</MenuItem></>}
+                                </SubMenu><MenuItem onClick={write_file}>database</MenuItem></>}
                             </Menu>
                         </div>
                     </div>
