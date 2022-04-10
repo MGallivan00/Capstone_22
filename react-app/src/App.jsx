@@ -1,5 +1,6 @@
-import React, {useState} from "react";
+import React, { useState, Component } from "react";
 import "./App.css";
+import ImageUpload from "./Upload";
 import Node from "./components/Node";
 import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
@@ -436,7 +437,8 @@ const App = () => {
 
     function export_to_JSON(prop) {
         lines.forEach(addChildren);
-        console.log(JSON.stringify(model_object));
+        // console.log(JSON.stringify(model_object));
+        storage.sort((a, b) => (a.type > b.type) ? 1 : -1);
         const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
         const a = document.createElement('a');
         a.download = (prop + ".json");
@@ -596,8 +598,7 @@ const App = () => {
         //document.getElementsByTagName("Select").defaultValue = {value: "other", label: 'Other'};
     }
 
-    // Fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
-    // TODO: Maria does not know what this function is for
+    //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
     function load_file() {
         // parse_JSON(JSON_preset);
         let name = window.prompt("Enter file name ");
@@ -608,10 +609,12 @@ const App = () => {
             {onlyOnce: true}
     }
 
-    // TODO: Maria does not know what this function is for
     function write_file() {
+        let branch = window.prompt("Enter the branch name: ");
         let name = window.prompt("Enter the file name: ");
-        set(ref(database, name + '/'), {
+
+
+        set(ref(database, branch+'/'+name + '/'), {
             name: name,
         });
     }
@@ -653,7 +656,7 @@ const App = () => {
                     className="canvasStyle"
                     id="canvas"
                     onClick={() => handleSelect(null)} >
-                    {/* Drag and Drop Tool Box*/}
+                    {/* Drag and Drop Tool Bar*/}
                     <div className="toolboxMenu">
                         {TYPE.map((shapeName) => (
                             <div
@@ -730,7 +733,7 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem onClick={load_file}>Load</MenuItem>
+                                <MenuItem><ImageUpload /></MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
