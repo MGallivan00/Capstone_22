@@ -1,24 +1,22 @@
-import React, {useState} from "react";
+import React, { useState, Component } from "react";
 import "./App.css";
+import ImageUpload from "./Upload";
 import Node from "./components/Node";
 import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
-import {Xwrapper} from "react-xarrows";
-import {Button} from 'react-floating-action-button'
-import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
+import { Xwrapper } from "react-xarrows";
+import { Container, Button } from 'react-floating-action-button'
+import { Menu, MenuItem, MenuButton, SubMenu } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
-import Select from 'react-select'; //https://react-select.com/home
-import {getDatabase, onValue, ref, set} from "firebase/database";
+import Select from 'react-select' ; //https://react-select.com/home
+
+import {getDatabase, ref, set, get, snapshot, onValue, getDocs} from "firebase/database";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
-import xarrow from "./components/Xarrow";
+ 
+
 
 // XArrows Code forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
-//
-// Other reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
-// and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
-// and https://www.youtube.com/watch?v=Px4Lm8NixtE
-// and https://www.w3schools.com/jsref/jsref_foreach.asp
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -26,6 +24,7 @@ import xarrow from "./components/Xarrow";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
 const firebaseConfig = {
     apiKey: "AIzaSyALd8fTT_YORi0wwJ7bC_7O347ssGlItvg",
     authDomain: "capstone-pique.firebaseapp.com",
@@ -41,239 +40,21 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const database = getDatabase();
 
-// Possible Node Types
-const options = [
-    {value:"tqi", label: 'TQI'},
-    {value:"quality_aspects", label: 'Quality Aspects'},
-    {value:"product_factors", label: 'Product Factors'},
+
+const options = [{value:"diagnostics", label: 'Diagnostics'},
     {value:"measures", label: 'Measures'},
-    {value:"diagnostics", label: 'Diagnostics'}];
+    {value:"product_factors", label: 'Product Factors'},
+    {value:"quality_aspects", label: 'Quality Aspects'},
+    {value:"tqi", label: 'TQI'}];
 
-// Arrays for storing nodes and lines
 const storage = [];
-const childlines = [];
-
-// For formatting shapes
 const TYPE = ["node"];
 
-// Example of an exported node
-const model_object = {
-    "factors": {
-        "tqi": {},
-        "quality_aspects": {},
-        "product_factors": {}
-    },
-    "measures": {},
-    "diagnostics": {}
-};
-
-// Example of a storage node
-const storage_object = {
-    id:"",
-    desc:"",
-    type:"",
-    children:[],
-    shape:"node",
-    x: 500,
-    y:500
-}
-
-// Load from preset variable for testing
-const JSON_preset = {
-    "factors": {
-        "tqi": {
-            "TQI": {
-                "description": "Total software quality",
-                "children": {
-                    "QualityAspect 01": {
-
-                    },
-                    "QualityAspect 02": {
-
-                    },
-                    "QualityAspect 03": {
-
-                    },
-                    "QualityAspect 04": {
-
-                    }
-                }
-            }
-        },
-        "quality_aspects": {
-            "QualityAspect 01": {
-                "description": "Performance",
-                "children": {
-                    "ProductFactor 01": {
-
-                    }
-                }
-            },
-            "QualityAspect 02": {
-                "description": "Compatibility",
-                "children": {
-                    "ProductFactor 02": {
-
-                    }
-                }
-            },
-            "QualityAspect 03": {
-                "description": "Maintainability",
-                "children": {
-                    "ProductFactor 03": {
-
-                    },
-                    "ProductFactor 04": {
-
-                    }
-                }
-            },
-            "QualityAspect 04": {
-                "description": "Security",
-                "children": {
-                    "ProductFactor 05": {
-
-                    },
-                    "ProductFactor 06": {
-
-                    }
-                }
-            }
-        },
-        "product_factors": {
-            "ProductFactor 01": {
-                "description": "Runtime",
-                "children": {
-                    "Measure 02": {
-
-                    }
-                }
-            },
-            "ProductFactor 02": {
-                "description": "Interoperability",
-                "children": {
-                    "Measure 03": {
-
-                    }
-                }
-            },
-            "ProductFactor 03": {
-                "description": "Modifiability",
-                "children": {
-                    "Measure 01": {
-
-                    },
-                    "Measure 04": {
-
-                    }
-                }
-            },
-            "ProductFactor 04": {
-                "description": "Reusability",
-                "children": {
-                    "Measure 02": {
-
-                    },
-                    "Measure 04": {
-
-                    }
-                }
-            },
-            "ProductFactor 05": {
-                "description": "Confidentiality",
-                "children": {
-                    "Measure 03": {
-
-                    }
-                }
-            },
-            "ProductFactor 06": {
-                "description": "Integrity",
-                "children": {
-                    "Measure 02": {
-
-                    },
-                    "Measure 04": {
-
-                    }
-                }
-            }
-        }
-    },
-    "measures": {
-        "Measure 01": {
-            "description": "Formatting",
-            "positive": false,
-            "children": {
-                "RCS1036": {
-
-                }
-            }
-        },
-        "Measure 02": {
-            "description": "Unused variable",
-            "positive": false,
-            "children": {
-                "CS0649": {
-
-                },
-                "RCS1163": {
-
-                },
-                "RCS1213": {
-
-                }
-            }
-        },
-        "Measure 03": {
-            "description": "Certifications",
-            "positive": false,
-            "children": {
-                "SCS0004": {
-
-                }
-            }
-        },
-        "Measure 04": {
-            "description": "Naming",
-            "positive": false,
-            "children": {
-                "VSTHRD200": {
-
-                }
-            }
-        }
-    },
-    "diagnostics": {
-        "CS0649": {
-            "description": "Field is never assigned to, and will always have its default value",
-            "toolName": "Roslynator"
-        },
-        "RCS1036": {
-            "description": "Remove redundant empty line",
-            "toolName": "Roslynator"
-        },
-        "RCS1163": {
-            "description": "Unused parameter",
-            "toolName": "Roslynator"
-        },
-        "RCS1213": {
-            "description": "Remove unused member declaration",
-            "toolName": "Roslynator"
-        },
-        "SCS0004": {
-            "description": "Certificate Validation has been disabled",
-            "toolName": "Roslynator"
-        },
-        "VSTHRD200": {
-            "description": "Use &quot;Async&quot; suffix for async methods",
-            "toolName": "Roslynator"
-        }
-    }
-}
-
 const App = () => {
-
+    
+    
+    // with reference from https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
+    // and https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
     let nodeName = "";
     let nodeDesc = "";
     let nodeType = "other";
@@ -286,7 +67,6 @@ const App = () => {
     const [selected, setSelected] = useState(null);
     const [actionState, setActionState] = useState("Normal");
 
-    // Handles Selected Nodes
     const handleSelect = (e) => {
         if (e === null) {
             setSelected(null);
@@ -294,17 +74,15 @@ const App = () => {
         } else setSelected({id: e.target.id, type: "node"});
     };
 
-    // Checks existence of nodes
     const checkExistence = (id) => {
         return [...nodes, ...interfaces].map((b) => b.id).includes(id);
     };
 
-    // Get functions for Node properties
+    // from https://www.youtube.com/watch?v=Px4Lm8NixtE
     function getName(prop){ nodeName = prop.target.value; }
     function getDesc(prop){ nodeDesc = prop.target.value; }
     function getType(prop){ nodeType = prop.value; }
 
-    // Handles Add-Node Drag and Drop Functionality
     const handleDropDynamic = (e) => {
         let l = nodes.length;
         let { x, y } = e.target.getBoundingClientRect();
@@ -313,54 +91,23 @@ const App = () => {
         if(nodeName === ""){
             nodeName = "node" + l;
         }
-        // This adds to the local storage array containing all nodes
         let newNode = {
             id: nodeName,
             desc: nodeDesc,
             type: nodeType,
             children: [],
-            // The x and y coordinates should be the location where the node is dropped, but it's not working?
             x: 500,
             y: 500,
-            //x: e.clientX - x,
-            //y: e.clientX - y,
+            // The x and y coordinates should be the location where the node is dropped, but it's not working?
+            // x: e.clientX - x,
+            // y: e.clientY - y,
             shape: object};
         setNodes([...nodes, newNode]);
         storage.push(newNode);
-        console.log(storage);
+        console.log(nodeName + "; " + nodeDesc + "; "+ nodeType + "; ");
         closeForm();
-        // Pushes node entry into JSON model object to match expected format
-        switch (nodeType) {
-            case "tqi":
-                model_object.factors.tqi[nodeName] = {};
-                model_object.factors.tqi[nodeName].description = nodeDesc;
-                model_object.factors.tqi[nodeName].children = [];
-                break;
-            case "quality_aspects":
-                model_object.factors.quality_aspects[nodeName] = {};
-                model_object.factors.quality_aspects[nodeName].description = nodeDesc;
-                model_object.factors.quality_aspects[nodeName].children = [];
-                break;
-            case "product_factors":
-                model_object.factors.product_factors[nodeName] = {};
-                model_object.factors.product_factors[nodeName].description = nodeDesc;
-                model_object.factors.product_factors[nodeName].children = [];
-                break;
-            case "measures":
-                model_object.measures[nodeName] = {};
-                model_object.measures[nodeName].description = nodeDesc;
-                model_object.factors.measures[nodeName].children = [];
-                break;
-            case "diagnostics":
-                model_object.diagnostics[nodeName] = {};
-                model_object.diagnostics[nodeName].description = nodeDesc;
-                model_object.factors.diagnostics[nodeName].children = [];
-                break;
-        }
-        //console.log(JSON.stringify(model_object));
     }
 
-    // Shows node info to user
     function showInfo(selected) {
         openInfo();
         const index = storage.findIndex(item => {
@@ -374,7 +121,6 @@ const App = () => {
         type.innerHTML = storage[index].type.toString();
     }
 
-    // Prompts user for file name
     function nameFile(){
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
@@ -382,7 +128,10 @@ const App = () => {
         toJSON(fileName);
     }
 
-    // Removes duplicate items in arraylist
+    function findNode(node){
+        return (node.id === this);
+    }
+
     function clean(arr){
         let clean = [];
         arr.sort();
@@ -397,212 +146,46 @@ const App = () => {
         return clean;
     }
 
-    // Finds a matching node
-    function findNode(node){
-        return (node.id === this);
-    }
-
-    // Adds children to the storage nodes to ensure links are accounted for //can add children but not delete them
+    //https://www.w3schools.com/jsref/jsref_foreach.asp
+    //can add children but not delete them
     function addChildren(l){
         let child = l.props.end;
         let p = l.props.start;
         let parent = storage.find(findNode, p);
         console.log(parent.children);
-        (parent.children).push(child);
+        parent.children.push(child);
         parent.children = clean(parent.children);
         console.log(storage);
     }
 
-    // Reads the loaded JSON as nested formatting
-    function parse_JSON(){
-        // makes JSON object parse-able
-        const obj = JSON.parse(JSON.stringify(JSON_preset));
-        const
-            factors = obj.factors,
-            measures = obj.measures,
-            diagnostics = obj.diagnostics;
-        for (let factor in factors){
-            switch(factor) {
-                case "tqi":
-                    let tqi_type = factors.tqi;
-                    for (const name in tqi_type) {
-                        store_node_from_JSON(
-                            name,
-                            tqi_type[name].description,
-                            factor,
-                            tqi_type[name].children
-                        )
-                    }
-                    break;
-                case "quality_aspects":
-                    let qa_type = factors.quality_aspects;
-                    // let entries = [];
-                    for (const name in qa_type) {
-                        store_node_from_JSON(
-                            name,
-                            qa_type[name].description,
-                            factor,
-                            qa_type[name].children
-                        )}
-                    break;
-                case "product_factors":
-                    let pf_type = factors.product_factors;
-                    // let entries = [];
-                    for (const name in pf_type) {
-                        store_node_from_JSON(
-                            name,
-                            pf_type[name].description,
-                            factor,
-                            pf_type[name].children
-                        )
-                    }
-                    break;
-            }
-        }
-        for (let name in measures) {
-            store_node_from_JSON(
-                name,
-                measures[name].description,
-                "measures",
-                measures[name].children
-            )
-        }
-        for (let name in diagnostics) {
-            store_node_from_JSON(
-                name,
-                diagnostics[name].description,
-                "diagnostics",
-                diagnostics[name].children
-            )
-        }
-    }
 
-    // variables to remember number of each type of node passed to store_node_from_JSON
-    let t;
-    let c = 0;
-    // Formats incoming JSON into the proper format for viewing on screen
-    function store_node_from_JSON(nodeName, nodeDesc, nodeType, nodeChildren){
-        let object = TYPE[0];
-        let nodewidth = nodeName.toString().length;
-        let xpos, ypos;
-
-        // sets height of node by Type
-        switch (nodeType){
-            case "tqi":
-                ypos = 180;
-                break;
-            case "quality_aspects":
-                ypos = 300;
-                break;
-            case "product_factors":
-                ypos = 420;
-                break;
-            case "measures":
-                ypos = 540;
-                break;
-            case "diagnostics":
-                ypos = 660;
-                break;
-        }
-        //console.log(t + " : "  + nodeType)
-        if(t !== nodeType){
-            c = 0;
-            t = nodeType;
-        } else{
-            c++;
-        }
-        //sets x placement of node by number type already places
-        //xpos = 850 + c*150*(Math.pow(-1, storage.length % 2)); //more centered
-        xpos = 250 - nodewidth*3.2 + c*200; //left justified
-        //console.log(nodeName + " Storage length: " + storage.length + " x: " + xpos + " y: " + ypos);
-
-        //creates the node from load
-        let newNode = {
-            id: nodeName,
-            desc: nodeDesc,
-            type: nodeType,
-            children: nodeChildren,
-            x: xpos,
-            y: ypos,
-            shape: object};
-        setNodes([...nodes, newNode]);
-        storage.push(newNode);
-        //console.log(storage);
-        for (let k in nodeChildren) {
-            let p = {props: {start: nodeName, end: k}};
-            //console.log(p);
-            setLines([...lines, p]);
-            childlines.push(p);
-        }
-
-    }
-
-    // Formats entries into the proper nested format before writing to file
-    function save_format(arr){
-        let format = [];
-        for (const o in options) {
-            //output = key: value;
-            // key == options[o].label
-            // value == entryArr
-            //         entry key = nodeName; value = info
-            //                                       info == {desc: "", child: []}
-
-            let entryArr = []; // array of {[nodeName] : info} in a specific classification
-            let optionArr = arr.filter(a => a.type === options[o].value);
-            console.log(optionArr);
-            optionArr.sort((x, y) => (x.id > y.id) ? 1 : -1);
-            for (const n in optionArr) {
-                let node = optionArr[n];
-                let entryKey = node.id;
-                let entryValue = {description: node.desc, children: node.children}
-                let entry = {[entryKey]: entryValue};
-                entryArr.push(entry);
-            }
-            console.log(entryArr);
-            let org = {[options[o].label]: entryArr};
-            console.log(org);
-            format.push(org);
-            format.sort();
-        }
-        return format;
-        //format will have 5 keys: each of the options.label
-        //format = { [nodeType]:
-        //                      [ {[nodeName]:
-        //                                      {desc: nodeDesc, children: []}
-        //                         }]
-        //          };
-    }
-
-    // Formats node array to JSON file formatting for export
     function toJSON(prop) {
         lines.forEach(addChildren);
-        //JSON.stringify(model_object);
-        let s = save_format(storage);
-        //const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
-        const data = new Blob([JSON.stringify(s)], {type: 'application/json'});
+        storage.sort((a, b) => (a.type > b.type) ? 1 : -1)
+
+        const data = new Blob([JSON.stringify(storage)], {type: 'application/json'});
         const a = document.createElement('a');
-        a.download = (prop + ".txt");
+        a.download = (prop + ".json");
         a.href = URL.createObjectURL(data);
         a.addEventListener('click', (e) => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
         a.click();
-        window.alert("JSON data is save to " + prop + ".json");
+        window.alert("JSON data is save to " + prop + ".txt");
     }
 
-    // Displays info popup
     function openInfo() {
         document.getElementById("info").style.display = "block";
     }
-    // Hides info popup
+
     function closeInfo() {
         document.getElementById("info").style.display = "none";
     }
-    // Displays entry form popup
+
     function openForm() {
         document.getElementById("popup").style.display = "block";
     }
-    // Hides and resets entry form popup
+
     function closeForm() {
         document.getElementById("popup").style.display = "none";
         document.getElementById("inputName").value = "";
@@ -611,8 +194,7 @@ const App = () => {
         //document.getElementsByTagName("Select").defaultValue = {value: "other", label: 'Other'};
     }
 
-    // Fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
-    // TODO: Maria does not know what this function is for
+    //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
     function load_file() {
         let name = window.prompt("Enter file name ");
         const test = ref(database, name + '/');
@@ -620,17 +202,18 @@ const App = () => {
             const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
         },
             {onlyOnce: true}
-    }
+    };
 
-    // TODO: Maria does not know what this function is for
     function write_file() {
+        let branch = window.prompt("Enter the branch name: ");
         let name = window.prompt("Enter the file name: ");
-        set(ref(database, name + '/'), {
+
+
+        set(ref(database, branch+'/'+name + '/'), {
             name: name,
         });
     }
 
-    // Properties
     const props = {
         interfaces,
         setInterfaces,
@@ -645,7 +228,6 @@ const App = () => {
         setLines
     };
 
-    // Node properties
     const nodeProps = {
         nodes,
         setNodes,
@@ -657,17 +239,27 @@ const App = () => {
         lines
     };
 
-    // HTML
+
+    function ihatejsonfiles(ImageUpload){
+        // setItem -> save to localstorage
+        // getItem -> retrieve from localstorage
+        var placeHolder = 20;
+
+
+    }
+
+
+
     return (
         <div>
-            {/* Workable area needs to be wrapped in Xwrapper so Xarrows dynamically re-render */}
+            {/* Workable area needs to be wrapped in Xwrapper so xarrows dynamically re-renders */}
             <Xwrapper>
                 {/* Root Canvas */}
                 <div
                     className="canvasStyle"
                     id="canvas"
                     onClick={() => handleSelect(null)} >
-                    {/* Drag and Drop Tool Box*/}
+                    {/* Drag and Drop Tool Bar*/}
                     <div className="toolboxMenu">
                         {TYPE.map((shapeName) => (
                             <div
@@ -693,7 +285,7 @@ const App = () => {
                         <TopBar {...props} />
 
                         {/* New Node Mapping */}
-                        {storage.map((node, i) => ( <Node
+                        {nodes.map((node, i) => ( <Node
                                 {...nodeProps}
                                 key={i} // this seems to be the way to make sure every child has a unique id in a list
                                 box={node}
@@ -702,7 +294,7 @@ const App = () => {
                             />
                         ))}
 
-                        {/* Add-Node Popup Menu */}
+                        {/* Add Node Popup Menu */}
                         <div className="form-popup" id="popup">
                             <div className="form-container" id="form">
                                 <h2>Input Node Info</h2>
@@ -746,12 +338,16 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem onClick={load_file}>Load</MenuItem>
+                                <MenuItem><ImageUpload /></MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
-                                    <MenuItem id="csharp" value="test" onClick={parse_JSON}>Csharp Model</MenuItem>
-                                    <MenuItem id="bin" value="test" onClick={parse_JSON}> Bin Model</MenuItem>
-                                </SubMenu><MenuItem onClick={write_file}>database</MenuItem></>}
+                                    <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
+                                    <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
+                                </SubMenu>
+                                <MenuItem onClick={write_file}>database</MenuItem>
+                
+                                </>
+                                }
                             </Menu>
                         </div>
                     </div>
@@ -759,18 +355,9 @@ const App = () => {
                     {lines.map((line, i) => (
                         <Xarrow
                             key={line.props.root + "-" + line.props.end + i}
-                            line={line}
+                            line={line}npm 
                             selected={selected}
                             setSelected={setSelected}
-                        />
-                    ))}
-                    {/* Xarrow Connections for Loading Preset */}
-                    {childlines.map((line, i) => (
-                        <Xarrow
-                            key={line.props.start + "-" + line.props.end + i}
-                            line={line}
-                            start={line.props.start}
-                            end={line.props.end}
                         />
                     ))}
                 </div>
@@ -778,5 +365,5 @@ const App = () => {
         </div>
     );
 };
-
+    
 export default App;
