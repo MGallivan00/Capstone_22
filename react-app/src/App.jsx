@@ -355,7 +355,6 @@ const App = () => {
             case "diagnostics":
                 model_object.diagnostics[nodeName] = {};
                 model_object.diagnostics[nodeName].description = nodeDesc;
-                // Dia
                 break;
         }
     }
@@ -379,11 +378,11 @@ const App = () => {
 
     // Prompts user for file name
     function nameFile(){
-        parse_JSON(JSON_preset);
+        // parse_JSON(JSON_preset);
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t)
-        toJSON(fileName);
+        export_to_JSON(fileName);
     }
 
     /**
@@ -435,9 +434,9 @@ const App = () => {
         // Diagnostic type nodes don't have children, so we don't need to worry about those.
     }
 
-    function toJSON(prop) {
+    function export_to_JSON(prop) {
         lines.forEach(addChildren);
-        // console.log(JSON.stringify(model_object));
+        console.log(JSON.stringify(model_object));
         const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
         const a = document.createElement('a');
         a.download = (prop + ".json");
@@ -574,7 +573,6 @@ const App = () => {
             setLines([...lines, p]);
             childlines.push(p);
         }
-
     }
 
     // Displays info popup
@@ -601,6 +599,7 @@ const App = () => {
     // Fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
     // TODO: Maria does not know what this function is for
     function load_file() {
+        // parse_JSON(JSON_preset);
         let name = window.prompt("Enter file name ");
         const test = ref(database, name + '/');
         return onValue(test), (snapshot) => {
@@ -731,7 +730,7 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem>Load</MenuItem>
+                                <MenuItem onClick={load_file}>Load</MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
