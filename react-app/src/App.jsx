@@ -6,12 +6,14 @@ import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
-import {getDatabase, onValue, ref, set} from "firebase/database";
+import {getDatabase, onValue, set} from "firebase/database";
+import { getStorage,ref, uploadBytes } from "firebase/storage";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {Button} from 'react-floating-action-button'
 import Select from 'react-select';
 import '@szhsin/react-menu/dist/index.css';
+//import { getScrollTop } from "react-select/dist/declarations/src/utils";
 
 /* Developed with code forked from:
  * https://github.com/Eliav2/react-xarrows/tree/master/examples
@@ -41,11 +43,15 @@ const firebaseConfig = {
     measurementId: "G-S0HHKBR67N"
 };
 
+
+
 // Initialize Firebase
 const
     app = initializeApp(firebaseConfig),
     analytics = getAnalytics(app),
-    database = getDatabase();
+    database = getDatabase(),
+    dbstorage = getStorage(),
+    storageRef = ref(dbstorage, 'child');
 
 // Possible Node Types
 const options = [
@@ -446,8 +452,17 @@ const App = () => {
         a.addEventListener('click', (e) => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
+
         a.click();
+
+        uploadBytes(storageRef, data).then((snapshot) => {
+            console.log('Uploaded a blob or file!');
+          });
+
         window.alert("JSON data is save to " + prop + ".json");
+        
+
+
     }
 
     /**
@@ -609,15 +624,6 @@ const App = () => {
             {onlyOnce: true}
     }
 
-    function write_file() {
-        let branch = window.prompt("Enter the branch name: ");
-        let name = window.prompt("Enter the file name: ");
-
-
-        set(ref(database, branch+'/'+name + '/'), {
-            name: name,
-        });
-    }
 
     // Properties
     const props = {
@@ -733,13 +739,12 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem><Upload/></MenuItem>
+                                <MenuItem> Upload /  </MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={load_file}>Bin Model</MenuItem>
-                                {/* TODO: What is the database button supposed to do? */}
-                                </SubMenu><MenuItem onClick={write_file}>Database</MenuItem>
+                                </SubMenu>
                                 </>}
                             </Menu>
                         </div>
