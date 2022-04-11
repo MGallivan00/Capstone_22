@@ -1,13 +1,13 @@
 import React, {useState} from "react";
 import "./App.css";
-import ImageUpload from "./Upload";
+import Upload from "./Upload.js";
 import Node from "./components/Node";
 import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
 import {getDatabase, onValue, set} from "firebase/database";
-import { getStorage,ref, uploadBytes } from "firebase/storage";
+import {getStorage,ref, uploadBytes } from "firebase/storage";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {Button} from 'react-floating-action-button'
@@ -50,8 +50,16 @@ const
     app = initializeApp(firebaseConfig),
     analytics = getAnalytics(app),
     database = getDatabase(),
-    dbstorage = getStorage(),
-    storageRef = ref(dbstorage, 'child');
+    dbstorage = getStorage();
+   // storageRef = ref(dbstorage,'uploaded/filename');
+
+  
+//function storageRef(prop)
+//{
+//    ref(dbstorage, 'uploaded/'+ prop);
+//}
+
+
 
 // Possible Node Types
 const options = [
@@ -390,6 +398,7 @@ const App = () => {
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t)
         export_to_JSON(fileName);
+       
     }
 
     /**
@@ -452,9 +461,8 @@ const App = () => {
         a.addEventListener('click', (e) => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
-
         a.click();
-
+        var storageRef = ref(dbstorage,'uploaded/' + prop);
         uploadBytes(storageRef, data).then((snapshot) => {
             console.log('Uploaded a blob or file!');
           });
@@ -739,7 +747,7 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem> Upload /  </MenuItem>
+                                <MenuItem> <Upload /></MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
