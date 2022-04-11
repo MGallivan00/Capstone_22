@@ -622,14 +622,14 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem><ImageUpload/></MenuItem>
+                                <MenuItem><Upload/></MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={function(){load_preset("csharp")}}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={function(){load_preset("bin")}}>Bin Model</MenuItem>
                                     {/*TODO: Add more presets here if necessary*/}
                                 </SubMenu><MenuItem onClick={write_file}>Database</MenuItem>
-                                    <MenuItem>Export</MenuItem></>}
+                                </>}
                             </Menu>
                         </div>
                     </div>
