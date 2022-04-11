@@ -6,12 +6,14 @@ import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
-import {getDatabase, onValue, ref, set} from "firebase/database";
+import {getDatabase, onValue, set} from "firebase/database";
+import { getStorage,ref, uploadBytes } from "firebase/storage";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {Button} from 'react-floating-action-button'
 import Select from 'react-select';
 import '@szhsin/react-menu/dist/index.css';
+//import { getScrollTop } from "react-select/dist/declarations/src/utils";
 
 /* Developed with code forked from:
  * https://github.com/Eliav2/react-xarrows/tree/master/examples
@@ -41,11 +43,15 @@ const firebaseConfig = {
     measurementId: "G-S0HHKBR67N"
 };
 
+
+
 // Initialize Firebase
 const
     app = initializeApp(firebaseConfig),
     analytics = getAnalytics(app),
-    database = getDatabase();
+    database = getDatabase(),
+    dbstorage = getStorage(),
+    storageRef = ref(dbstorage, 'child');
 
 // Possible Node Types
 const options = [
@@ -53,30 +59,16 @@ const options = [
     {value:"quality_aspects", label: 'Quality Aspects'},
     {value:"product_factors", label: 'Product Factors'},
     {value:"measures", label: 'Measures'},
-    {value:"diagnostics", label: 'Diagnostics'},
-    {value:"name", label:'Model Name'},
-    {value:"additionalData", label:'Additional Data'},
-    {value:"global_config", label:'Global Config Information'}];
-    // TODO: Do we include these as options, or do we just have the user manually fill it in later?
-    // {value:"benchmark_strategy", label:'Benchmark Strategy'},
-    // {value:"normalizer_strategy", label:'Normalizer Strategy'}];
+    {value:"diagnostics", label: 'Diagnostics'}];
 
-const bool_options = [
-    {value: false, label: "False"},
-    {value: true, label: "True"}];
 const
     // Arrays for storing nodes and lines
     storage = [],
     childlines = [],
     // For formatting shapes
     TYPE = ["node"],
-    // Framework for creating/exporting model
+    // Example of an exported node
     model_object = {
-        "name": "",
-        "additionalData":{},
-        "global_config":{
-            // TODO: what kind of place holders do we need for config information?
-        },
         "factors": {
             "tqi": {},
             "quality_aspects": {},
@@ -87,21 +79,208 @@ const
     };
 
 // Load from preset variable for testing
-let JSON_preset = {};
+const JSON_preset = {
+    "factors": {
+        "tqi": {
+            "TQI": {
+                "description": "Total software quality",
+                "children": {
+                    "QualityAspect 01": {
+
+                    },
+                    "QualityAspect 02": {
+
+                    },
+                    "QualityAspect 03": {
+
+                    },
+                    "QualityAspect 04": {
+
+                    }
+                }
+            }
+        },
+        "quality_aspects": {
+            "QualityAspect 01": {
+                "description": "Performance",
+                "children": {
+                    "ProductFactor 01": {
+
+                    }
+                }
+            },
+            "QualityAspect 02": {
+                "description": "Compatibility",
+                "children": {
+                    "ProductFactor 02": {
+
+                    }
+                }
+            },
+            "QualityAspect 03": {
+                "description": "Maintainability",
+                "children": {
+                    "ProductFactor 03": {
+
+                    },
+                    "ProductFactor 04": {
+
+                    }
+                }
+            },
+            "QualityAspect 04": {
+                "description": "Security",
+                "children": {
+                    "ProductFactor 05": {
+
+                    },
+                    "ProductFactor 06": {
+
+                    }
+                }
+            }
+        },
+        "product_factors": {
+            "ProductFactor 01": {
+                "description": "Runtime",
+                "children": {
+                    "Measure 02": {
+
+                    }
+                }
+            },
+            "ProductFactor 02": {
+                "description": "Interoperability",
+                "children": {
+                    "Measure 03": {
+
+                    }
+                }
+            },
+            "ProductFactor 03": {
+                "description": "Modifiability",
+                "children": {
+                    "Measure 01": {
+
+                    },
+                    "Measure 04": {
+
+                    }
+                }
+            },
+            "ProductFactor 04": {
+                "description": "Reusability",
+                "children": {
+                    "Measure 02": {
+
+                    },
+                    "Measure 04": {
+
+                    }
+                }
+            },
+            "ProductFactor 05": {
+                "description": "Confidentiality",
+                "children": {
+                    "Measure 03": {
+
+                    }
+                }
+            },
+            "ProductFactor 06": {
+                "description": "Integrity",
+                "children": {
+                    "Measure 02": {
+
+                    },
+                    "Measure 04": {
+
+                    }
+                }
+            }
+        }
+    },
+    "measures": {
+        "Measure 01": {
+            "description": "Formatting",
+            "positive": false,
+            "children": {
+                "RCS1036": {
+
+                }
+            }
+        },
+        "Measure 02": {
+            "description": "Unused variable",
+            "positive": false,
+            "children": {
+                "CS0649": {
+
+                },
+                "RCS1163": {
+
+                },
+                "RCS1213": {
+
+                }
+            }
+        },
+        "Measure 03": {
+            "description": "Certifications",
+            "positive": false,
+            "children": {
+                "SCS0004": {
+
+                }
+            }
+        },
+        "Measure 04": {
+            "description": "Naming",
+            "positive": false,
+            "children": {
+                "VSTHRD200": {
+
+                }
+            }
+        }
+    },
+    "diagnostics": {
+        "CS0649": {
+            "description": "Field is never assigned to, and will always have its default value",
+            "toolName": "Roslynator"
+        },
+        "RCS1036": {
+            "description": "Remove redundant empty line",
+            "toolName": "Roslynator"
+        },
+        "RCS1163": {
+            "description": "Unused parameter",
+            "toolName": "Roslynator"
+        },
+        "RCS1213": {
+            "description": "Remove unused member declaration",
+            "toolName": "Roslynator"
+        },
+        "SCS0004": {
+            "description": "Certificate Validation has been disabled",
+            "toolName": "Roslynator"
+        },
+        "VSTHRD200": {
+            "description": "Use &quot;Async&quot; suffix for async methods",
+            "toolName": "Roslynator"
+        }
+    }
+}
 
 const App = () => {
     /* References:
      * https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
      * https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
      */
-
-    // Default node values
     let
         nodeName = "",
         nodeDesc = "",
-        toolName = "",
-        nodeType = "other",
-        is_positive = false;
+        nodeType = "other";
 
     const
         [interfaces, setInterfaces] = useState([]),
@@ -127,13 +306,11 @@ const App = () => {
     function getName(prop){ nodeName = prop.target.value; }
     function getDesc(prop){ nodeDesc = prop.target.value; }
     function getType(prop){ nodeType = prop.value; }
-    function getTool(prop){ toolName = prop.target.value; }
-    function getBool(prop){ is_positive = prop.value; }
 
     /**
      * Handles node drag-drop functionality. Pushes node information into an entry on the local "storage"
      * array. In addition, when a node is added a properly formatted JSON object is pushed onto the "model_object"
-     * that is used in creating the model that is exported to the user.
+     * that is used in exporting to a JSON file.
      * @const
      */
     const handleDropDynamic = (e) => {
@@ -145,7 +322,6 @@ const App = () => {
             nodeName = "node" + l;
         }
         // This adds to the local storage array containing all nodes
-        // TODO: If check for diagnostic or measure node types
         let newNode = {
             id: nodeName,
             desc: nodeDesc,
@@ -163,9 +339,6 @@ const App = () => {
         closeForm();
         // Pushes node entry into JSON model object to match expected format
         switch (nodeType) {
-            case "name":
-                model_object.name = nodeName;
-                break;
             case "tqi":
                 model_object.factors.tqi[nodeName] = {};
                 model_object.factors.tqi[nodeName].description = nodeDesc;
@@ -184,13 +357,11 @@ const App = () => {
             case "measures":
                 model_object.measures[nodeName] = {};
                 model_object.measures[nodeName].description = nodeDesc;
-                model_object.measures[nodeName].positive = is_positive;
                 model_object.measures[nodeName].children = {};
                 break;
             case "diagnostics":
                 model_object.diagnostics[nodeName] = {};
                 model_object.diagnostics[nodeName].description = nodeDesc;
-                model_object.diagnostics[nodeName].toolName = toolName;
                 break;
         }
     }
@@ -215,7 +386,6 @@ const App = () => {
     // Prompts user for file name
     function nameFile(){
         // parse_JSON(JSON_preset);
-        // console.log(typeof JSON_preset);
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t)
@@ -273,7 +443,7 @@ const App = () => {
 
     function export_to_JSON(prop) {
         lines.forEach(addChildren);
-        console.log(JSON.stringify(model_object));
+        // console.log(JSON.stringify(model_object));
         storage.sort((a, b) => (a.type > b.type) ? 1 : -1);
         const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
         const a = document.createElement('a');
@@ -282,8 +452,17 @@ const App = () => {
         a.addEventListener('click', (e) => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
+
         a.click();
+
+        uploadBytes(storageRef, data).then((snapshot) => {
+            console.log('Uploaded a blob or file!');
+          });
+
         window.alert("JSON data is save to " + prop + ".json");
+        
+
+
     }
 
     /**
@@ -296,7 +475,6 @@ const App = () => {
         // makes JSON object parse-able
         const obj = JSON.parse(JSON.stringify(incoming_json));
         const
-            name = obj.name,
             factors = obj.factors,
             measures = obj.measures,
             diagnostics = obj.diagnostics;
@@ -304,63 +482,53 @@ const App = () => {
             switch(factor) {
                 case "tqi":
                     let tqi_type = factors.tqi;
-                    for (const data in tqi_type) {
+                    for (const name in tqi_type) {
                         store_node_from_JSON(
-                            data,
-                            tqi_type[data].description,
+                            name,
+                            tqi_type[name].description,
                             factor,
-                            tqi_type[data].children
+                            tqi_type[name].children
                         )
                     }
                     break;
                 case "quality_aspects":
                     let qa_type = factors.quality_aspects;
-                    for (const data in qa_type) {
+                    for (const name in qa_type) {
                         store_node_from_JSON(
-                            data,
-                            qa_type[data].description,
+                            name,
+                            qa_type[name].description,
                             factor,
-                            qa_type[data].children
+                            qa_type[name].children
                         )
                     }
                     break;
                 case "product_factors":
                     let pf_type = factors.product_factors;
-                    for (const data in pf_type) {
+                    for (const name in pf_type) {
                         store_node_from_JSON(
-                            data,
-                            pf_type[data].description,
+                            name,
+                            pf_type[name].description,
                             factor,
-                            pf_type[data].children
+                            pf_type[name].children
                         )
                     }
                     break;
             }
         }
-        // TODO: Add a construct that will add the information for the name of the model
-        // for (let data in name) {
-        //     store_node_from_JSON(
-        //         data,
-        //         null,
-        //         "name",
-        //         null
-        //     )
-        // }
-        store_node_from_JSON(name, "", "name",null);
-        for (let data in measures) {
+        for (let name in measures) {
             store_node_from_JSON(
-                data,
-                measures[data].description,
+                name,
+                measures[name].description,
                 "measures",
-                measures[data].children
+                measures[name].children
             )
         }
-        for (let data in diagnostics) {
+        for (let name in diagnostics) {
             store_node_from_JSON(
-                data,
-                diagnostics[data].description,
+                name,
+                diagnostics[name].description,
                 "diagnostics",
-                diagnostics[data].children
+                diagnostics[name].children
             )
         }
     }
@@ -370,15 +538,12 @@ const App = () => {
     let c = 0;
     // Formats incoming JSON into the proper format for viewing on screen
     function store_node_from_JSON(nodeName, nodeDesc, nodeType, nodeChildren){
-        let object = TYPE[0],
-            nodewidth = nodeName.toString().length,
-            xpos, ypos;
+        let object = TYPE[0];
+        let nodewidth = nodeName.toString().length;
+        let xpos, ypos;
 
         // sets height of node by Type
         switch (nodeType){
-            case "name":
-                ypos = 90;
-                break;
             case "tqi":
                 ypos = 180;
                 break;
@@ -407,7 +572,6 @@ const App = () => {
         xpos = 250 - nodewidth*3.2 + c*200; //left justified
         //console.log(nodeName + " Storage length: " + storage.length + " x: " + xpos + " y: " + ypos);
 
-        // TODO: Add if-block to handle name and global_config info?
         //creates the node from load
         let newNode = {
             id: nodeName,
@@ -445,52 +609,21 @@ const App = () => {
         document.getElementById("popup").style.display = "none";
         document.getElementById("inputName").value = "";
         document.getElementById("inputDesc").value = "";
-        document.getElementById("toolName").value = "";
         //I just don't know why it won't reset like inputName and Desc
         //document.getElementsByTagName("Select").defaultValue = {value: "other", label: 'Other'};
     }
 
-    /**
-     * This function is called on the click event for the preset options. It takes a JSON preset name,
-     * defines the local file path to that JSON , loads the JSON into local storage, and passes the
-     * JSON object to the parse_JSON function to be read in and loaded to screen.
-     * @function
-     */
-    function load_preset(preset) {
-        switch (preset) {
-            case "csharp":
-                JSON_preset = require('./presets/pique-csharp-sec-model.json');
-                break;
-            case "bin":
-                JSON_preset = require('./presets/pique-bin-model.json');
-                break;
-            default:
-                console.log("No preset provided");
-            // TODO: If necessary, more presets can be added here
-        }
-        parse_JSON(JSON_preset);
-    }
-
     //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
-    // TODO: This function is intended to load files from the database, correct?
-    // function load_file() {
-    //     let name = window.prompt("Enter file name ");
-    //     const test = ref(database, name + '/');
-    //     return onValue(test), (snapshot) => {
-    //         const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
-    //     },
-    //         {onlyOnce: true}
-    // }
-
-    function write_file() {
-        let branch = window.prompt("Enter the branch name: ");
-        let name = window.prompt("Enter the file name: ");
-
-
-        set(ref(database, branch+'/'+name + '/'), {
-            name: name,
-        });
+    function load_file() {
+        // parse_JSON(JSON_preset);
+        let name = window.prompt("Enter file name ");
+        const test = ref(database, name + '/');
+        return onValue(test), (snapshot) => {
+            const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
+        },
+            {onlyOnce: true}
     }
+
 
     // Properties
     const props = {
@@ -557,7 +690,7 @@ const App = () => {
                         {storage.map((node, i) => ( <Node
                                 {...nodeProps}
                                 key={i} // this seems to be the way to make sure every child has a unique id in a list
-                                node={node}
+                                box={node}
                                 position="absolute"
                                 sidePos="middle"
                             />
@@ -565,8 +698,8 @@ const App = () => {
                         {/* Add Node Popup Menu */}
                         <div className="form-popup" id="popup">
                             <div className="form-container" id="form">
-                                <h2>Input Node Information</h2>
-                                <b>Node Name</b>
+                                <h2>Input Node Info</h2>
+                                <b>Name</b>
                                 <input type="text"
                                        placeholder="Name"
                                        id="inputName"
@@ -576,26 +709,10 @@ const App = () => {
                                        placeholder="Description"
                                        id="inputDesc"
                                        onChange={getDesc}/>
-                                <br/>
                                 <b>Classification</b>
                                 {/*tqi, quality_aspects, product_factors, measures, diagnostics*/}
                                 {/* drop-down messed up for showing values or resetting value*/}
-                                <Select id="inputType"
-                                        options={options}
-                                        value={"Other"}
-                                        onChange={getType} />
-                                <br/>
-                                <b>Positive? (for Measures)</b>
-                                <Select id="positiveType"
-                                        options={bool_options}
-                                        value={"Bool"}
-                                        onChange={getBool} />
-                                <br/>
-                                <b>Tool Name (for Diagnostics)</b>
-                                <input type="text"
-                                       placeholder="Name"
-                                       id="toolName"
-                                       onChange={getTool}/>
+                                <Select id="inputType" options={options} value={"Other"} onChange={getType} />
                                 {/* Submission Button */}
                                 <Button
                                     tooltip="Submit"
@@ -622,13 +739,12 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem><Upload/></MenuItem>
+                                <MenuItem> Upload /  </MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
-                                    <MenuItem id="csharp" value="test" onClick={function(){load_preset("csharp")}}>Csharp Model</MenuItem>
-                                    <MenuItem id="bin" value="test" onClick={function(){load_preset("bin")}}>Bin Model</MenuItem>
-                                    {/*TODO: Add more presets here if necessary*/}
-                                </SubMenu><MenuItem onClick={write_file}>Database</MenuItem>
+                                    <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
+                                    <MenuItem id="bin" value="test" onClick={load_file}>Bin Model</MenuItem>
+                                </SubMenu>
                                 </>}
                             </Menu>
                         </div>
