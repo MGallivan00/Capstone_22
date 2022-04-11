@@ -1,4 +1,4 @@
-import React, { useState, Component } from "react";
+import React, {useState} from "react";
 import "./App.css";
 import ImageUpload from "./Upload";
 import Node from "./components/Node";
@@ -733,11 +733,11 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem><ImageUpload /></MenuItem>
+                                <MenuItem><ImageUpload/></MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
-                                    <MenuItem id="bin" value="test" onClick={load_file}> Bin Model</MenuItem>
+                                    <MenuItem id="bin" value="test" onClick={load_file}>Bin Model</MenuItem>
                                 {/* TODO: What is the database button supposed to do? */}
                                 </SubMenu><MenuItem onClick={write_file}>Database</MenuItem>
                                     <MenuItem>Export</MenuItem></>}
