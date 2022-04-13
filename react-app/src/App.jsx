@@ -7,7 +7,7 @@ import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
 import {getDatabase, onValue, set} from "firebase/database";
-import {getStorage,ref, uploadBytes } from "firebase/storage";
+import {getStorage,ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {Button} from 'react-floating-action-button'
@@ -53,7 +53,9 @@ const
     dbstorage = getStorage();
    // storageRef = ref(dbstorage,'uploaded/filename');
 
-  
+
+
+
 //function storageRef(prop)
 //{
 //    ref(dbstorage, 'uploaded/'+ prop);
@@ -393,7 +395,7 @@ const App = () => {
 
     // Prompts user for file name
     function nameFile(){
-        // parse_JSON(JSON_preset);
+        parse_JSON(JSON_preset);
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t)
@@ -660,6 +662,15 @@ const App = () => {
         lines
     };
 
+    ///download from firebase here
+    
+    function loadCSharp_JSON(){
+        //var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/pique-csharp-sec-model[4389].json');
+        var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/testing.json');
+        parse_JSON(cRef)
+    }   
+    
+
     // HTML
     return (
         <div>
@@ -750,7 +761,7 @@ const App = () => {
                                 <MenuItem> <Upload /></MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
-                                    <MenuItem id="csharp" value="test" onClick={load_file}>Csharp Model</MenuItem>
+                                    <MenuItem id="csharp" value="test" onClick={parse_JSON}>Csharp Model</MenuItem>
                                     <MenuItem id="bin" value="test" onClick={load_file}>Bin Model</MenuItem>
                                 </SubMenu>
                                 </>}
