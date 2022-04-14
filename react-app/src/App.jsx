@@ -395,14 +395,19 @@ const App = () => {
 
     // Prompts user for file name
     function nameFile(){
-        parse_JSON(JSON_preset);
+        //var filepath = "presets/"+ fileName;
+        //parse_JSON(filepath);
+        // parse_JSON(JSON_preset);
+
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
-        let fileName = window.prompt("Enter the filename: ", t)
+        let fileName = window.prompt("Enter the filename: ", t);
         export_to_JSON(fileName);
+        //const filepath2 = 'Capstone_22/react-app/src/presets/testing.json';
+        const filepath = 'presets'+fileName+'.json';
+        parse_JSON(filepath);
        
     }
-
     /**
      * As nodes are added to the screen, they are added into the existing global JSON "model object",
      * however, the children cannot be added to the model object until after the nodes are defined.
@@ -470,10 +475,28 @@ const App = () => {
           });
 
         window.alert("JSON data is save to " + prop + ".json");
-        
-
-
     }
+
+       //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
+    function load_file() {
+
+        // parse_JSON(JSON_preset);
+        let name = window.prompt("Enter file name ");
+        const test = ref(database,  + 'uploaded/'+name +".json");
+        return onValue(test), (snapshot) => {
+            const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
+            parse_JSON(test)
+        },
+            {onlyOnce: true}
+            
+    }
+    function loadCSharp_JSON(){
+        //var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/pique-csharp-sec-model[4389].json');
+        var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/testing.json');
+        parse_JSON(cRef)
+    }   
+    
+
 
     /**
      * Takes the incoming JSON file that needs to be stored into a JSON object locally,
@@ -623,17 +646,7 @@ const App = () => {
         //document.getElementsByTagName("Select").defaultValue = {value: "other", label: 'Other'};
     }
 
-    //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
-    function load_file() {
-        // parse_JSON(JSON_preset);
-        let name = window.prompt("Enter file name ");
-        const test = ref(database, name + '/');
-        return onValue(test), (snapshot) => {
-            const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
-        },
-            {onlyOnce: true}
-    }
-
+ 
 
     // Properties
     const props = {
@@ -664,12 +677,7 @@ const App = () => {
 
     ///download from firebase here
     
-    function loadCSharp_JSON(){
-        //var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/pique-csharp-sec-model[4389].json');
-        var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/testing.json');
-        parse_JSON(cRef)
-    }   
-    
+
 
     // HTML
     return (
@@ -759,6 +767,7 @@ const App = () => {
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
                                 <MenuItem> <Upload /></MenuItem>
+                                
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={parse_JSON}>Csharp Model</MenuItem>
