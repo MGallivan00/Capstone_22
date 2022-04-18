@@ -7,41 +7,41 @@ import { useXarrow } from "react-xarrows";
 const Node = (props) => {
     const updateXarrow = useXarrow();
     const handleClick = (e) => {
-        //so only the click event on the box will fire on not on the container itself
+        //so only the click event on the node will fire on not on the container itself
         e.stopPropagation();
         if (props.actionState === "Normal") {
             props.handleSelect(e);
         } else if (
             props.actionState === "Add Connections" &&
-            props.selected.id !== props.box.id
+            props.selected.id !== props.node.id
         ) {
             props.setLines((lines) => [
                 ...lines,
                 {
-                    props: { start: props.selected.id, end: props.box.id },
+                    props: { start: props.selected.id, end: props.node.id },
                 }
             ]);
         } else if (props.actionState === "Remove Connections") {
             props.setLines((lines) =>
                 lines.filter(
                     (line) =>
-                        !(line.root === props.selected.id && line.end === props.box.id)
+                        !(line.root === props.selected.id && line.end === props.node.id)
                 )
             );
         }
     };
 
     let background = null;
-    if (props.selected && props.selected.id === props.box.id) {
+    if (props.selected && props.selected.id === props.node.id) {
         background = "#24bd57";
     } else if (
         (props.actionState === "Add Connections" &&
             props.lines.filter(
-                (line) => line.root === props.selected.id && line.end === props.box.id
+                (line) => line.root === props.selected.id && line.end === props.node.id
             ).length === 0) ||
         (props.actionState === "Remove Connections" &&
             props.lines.filter(
-                (line) => line.root === props.selected.id && line.end === props.box.id
+                (line) => line.root === props.selected.id && line.end === props.node.id
             ).length > 0)
     ) {
         background = "#ffeb33";
@@ -55,17 +55,17 @@ const Node = (props) => {
                 onDrag={updateXarrow}
             >
                 <div
-                    ref={props.box.reference}
-                    className={`${props.box.shape} ${props.position} hoverMarker`}
+                    ref={props.node.reference}
+                    className={`${props.node.shape} ${props.position} hoverMarker`}
                     style={{
-                        left: props.box.x,
-                        top: props.box.y,
+                        left: props.node.x,
+                        top: props.node.y,
                         background
                     }}
                     onClick={handleClick}
-                    id={props.box.id}
+                    id={props.node.id}
                 >
-                    {props.box.name ? props.box.name : props.box.id}
+                    {props.node.name ? props.node.name : props.node.id}
                 </div>
             </Draggable>
         </React.Fragment>
