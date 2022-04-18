@@ -5,7 +5,7 @@ import './TopBar.css';
 
 const actions = {
     // node: ['Add Connections', 'Remove Connections', 'Delete'],
-    node: ['Edit Name', 'Add Connections', 'Delete', 'Show Information'],
+    node: ['Edit Name', 'Add Connections', 'Show Information', 'Delete'],
     arrow: ['Edit Properties', 'Remove Connection'],
 };
 
@@ -60,8 +60,8 @@ const TopBar = (props) => {
                         );
                     });
                     // if it is a node remove from nodes
-                    if (props.nodes.map((box) => box.id).includes(props.selected.id)) {
-                        props.setNodes((nodes) => nodes.filter((box) => !(box.id === props.selected.id)));
+                    if (props.nodes.map((node) => node.id).includes(props.selected.id)) {
+                        props.setNodes((nodes) => nodes.filter((node) => !(node.id === props.selected.id)));
                     }
                     props.handleSelect(null);
                 }

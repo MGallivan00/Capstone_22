@@ -29,6 +29,7 @@ export default ({ setSelected, selected, line: { props } }) => {
         ...props,
         ...state,
         color,
-        showHead: true,
+        showHead: false,
+        showTail: true,
         path: "straight"}} />;
 };
