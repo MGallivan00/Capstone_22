@@ -1,17 +1,19 @@
 import React, {useState} from "react";
 import "./App.css";
-import ImageUpload from "./Upload";
+import Upload from "./Upload.js";
 import Node from "./components/Node";
 import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
-import {getDatabase, onValue, ref, set} from "firebase/database";
+import {getDatabase, onValue, set} from "firebase/database";
+import {getStorage,ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {Button} from 'react-floating-action-button'
 import Select from 'react-select';
 import '@szhsin/react-menu/dist/index.css';
+//import { getScrollTop } from "react-select/dist/declarations/src/utils";
 
 /* Developed with code forked from:
  * https://github.com/Eliav2/react-xarrows/tree/master/examples
@@ -45,7 +47,19 @@ const firebaseConfig = {
 const
     app = initializeApp(firebaseConfig),
     analytics = getAnalytics(app),
-    database = getDatabase();
+    database = getDatabase(),
+    dbstorage = getStorage();
+   // storageRef = ref(dbstorage,'uploaded/filename');
+
+
+
+
+//function storageRef(prop)
+//{
+//    ref(dbstorage, 'uploaded/'+ prop);
+//}
+
+
 
 // Possible Node Types
 const options = [
@@ -214,14 +228,19 @@ const App = () => {
 
     // Prompts user for file name
     function nameFile(){
+        //var filepath = "presets/"+ fileName;
+        //parse_JSON(filepath);
         // parse_JSON(JSON_preset);
         // console.log(typeof JSON_preset);
+
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
-        let fileName = window.prompt("Enter the filename: ", t)
+        let fileName = window.prompt("Enter the filename: ", t);
         export_to_JSON(fileName);
+        //const filepath2 = 'Capstone_22/react-app/src/presets/testing.json';
+        const filepath = 'presets'+fileName+'.json';
+        parse_JSON(filepath);
     }
-
     /**
      * As nodes are added to the screen, they are added into the existing global JSON "model object",
      * however, the children cannot be added to the model object until after the nodes are defined.
@@ -283,8 +302,34 @@ const App = () => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
         a.click();
+        var storageRef = ref(dbstorage,'uploaded/' + prop);
+        uploadBytes(storageRef, data).then((snapshot) => {
+            console.log('Uploaded a blob or file!');
+          });
+
         window.alert("JSON data is save to " + prop + ".json");
     }
+
+       //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
+    function load_file() {
+
+        // parse_JSON(JSON_preset);
+        let name = window.prompt("Enter file name ");
+        const test = ref(database,  + 'uploaded/'+name +".json");
+        return onValue(test), (snapshot) => {
+            const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
+            parse_JSON(test)
+        },
+            {onlyOnce: true}
+            
+    }
+    function loadCSharp_JSON(){
+        //var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/pique-csharp-sec-model[4389].json');
+        var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/testing.json');
+        parse_JSON(cRef)
+    }   
+    
+
 
     /**
      * Takes the incoming JSON file that needs to be stored into a JSON object locally,
@@ -519,6 +564,10 @@ const App = () => {
         lines
     };
 
+    ///download from firebase here
+
+
+
     // HTML
     return (
         <div>
@@ -622,7 +671,8 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem><ImageUpload/></MenuItem>
+                                <MenuItem> <Upload /></MenuItem>
+
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
                                     <MenuItem id="csharp" value="test" onClick={function(){load_preset("csharp")}}>Csharp Model</MenuItem>
