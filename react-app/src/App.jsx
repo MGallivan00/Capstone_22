@@ -51,15 +51,10 @@ const
     dbstorage = getStorage();
    // storageRef = ref(dbstorage,'uploaded/filename');
 
-
-
-
 //function storageRef(prop)
 //{
 //    ref(dbstorage, 'uploaded/'+ prop);
 //}
-
-
 
 // Possible Node Types
 const options = [
@@ -86,7 +81,7 @@ const
     TYPE = ["node"],
     // Framework for creating/exporting model
     model_object = {
-        "name": "",
+        "name": "Default",
         "additionalData":{},
         "global_config":{
             // TODO: what kind of place holders do we need for config information?
@@ -241,6 +236,7 @@ const App = () => {
         const filepath = 'presets'+fileName+'.json';
         parse_JSON(filepath);
     }
+
     /**
      * As nodes are added to the screen, they are added into the existing global JSON "model object",
      * however, the children cannot be added to the model object until after the nodes are defined.
@@ -302,17 +298,15 @@ const App = () => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
         a.click();
-        var storageRef = ref(dbstorage,'uploaded/' + prop);
+        let storageRef = ref(dbstorage, 'uploaded/' + prop);
         uploadBytes(storageRef, data).then((snapshot) => {
             console.log('Uploaded a blob or file!');
-          });
-
+        });
         window.alert("JSON data is save to " + prop + ".json");
     }
 
-       //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
+    //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
     function load_file() {
-
         // parse_JSON(JSON_preset);
         let name = window.prompt("Enter file name ");
         const test = ref(database,  + 'uploaded/'+name +".json");
@@ -321,15 +315,14 @@ const App = () => {
             parse_JSON(test)
         },
             {onlyOnce: true}
-            
     }
+
     function loadCSharp_JSON(){
         //var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/pique-csharp-sec-model[4389].json');
         var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/testing.json');
         parse_JSON(cRef)
-    }   
+    }
     
-
 
     /**
      * Takes the incoming JSON file that needs to be stored into a JSON object locally,
@@ -382,16 +375,10 @@ const App = () => {
                     break;
             }
         }
-        // TODO: Add a construct that will add the information for the name of the model
-        // for (let data in name) {
-        //     store_node_from_JSON(
-        //         data,
-        //         null,
-        //         "name",
-        //         null
-        //     )
-        // }
-        store_node_from_JSON(name, "", "name",null);
+        // handles model name
+        store_node_from_JSON(name, "", "name", null);
+
+        // TODO: include the positive boolean field for measures and the tool name for diagnostics
         for (let data in measures) {
             store_node_from_JSON(
                 data,
@@ -497,35 +484,15 @@ const App = () => {
 
     /**
      * This function is called on the click event for the preset options. It takes a JSON preset name,
-     * defines the local file path to that JSON , loads the JSON into local storage, and passes the
+     * defines the local file path to that JSON, loads the JSON into local storage, and passes the
      * JSON object to the parse_JSON function to be read in and loaded to screen.
      * @function
      */
-    function load_preset(preset) {
-        switch (preset) {
-            case "csharp":
-                JSON_preset = require('./presets/pique-csharp-sec-model.json');
-                break;
-            case "bin":
-                JSON_preset = require('./presets/pique-bin-model.json');
-                break;
-            default:
-                console.log("No preset provided");
-            // TODO: If necessary, more presets can be added here
-        }
+    function load_preset(name) {
+        let filename = name + ".json"
+        let JSON_preset = require(`./presets/${filename}`)
         parse_JSON(JSON_preset);
     }
-
-    //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
-    // TODO: This function is intended to load files from the database, correct?
-    // function load_file() {
-    //     let name = window.prompt("Enter file name ");
-    //     const test = ref(database, name + '/');
-    //     return onValue(test), (snapshot) => {
-    //         const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
-    //     },
-    //         {onlyOnce: true}
-    // }
 
     function write_file() {
         let branch = window.prompt("Enter the branch name: ");
@@ -565,8 +532,6 @@ const App = () => {
     };
 
     ///download from firebase here
-
-
 
     // HTML
     return (
@@ -675,9 +640,18 @@ const App = () => {
 
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
-                                    <MenuItem id="csharp" value="test" onClick={function(){load_preset("csharp")}}>Csharp Model</MenuItem>
-                                    <MenuItem id="bin" value="test" onClick={function(){load_preset("bin")}}>Bin Model</MenuItem>
-                                    {/*TODO: Add more presets here if necessary*/}
+                                    {/*<MenuItem id="csharp" value="test" onClick={function(){load_preset("csharp")}}>Csharp Model</MenuItem>*/}
+                                    <MenuItem id="csharp"
+                                              value="test"
+                                              onClick={function(){load_preset('pique-csharp-sec-model')}}
+                                    >Csharp Model
+                                    </MenuItem>
+                                    <MenuItem id="bin"
+                                              value="test"
+                                              onClick={function(){load_preset('pique-bin-model')}}
+                                    >Bin Model
+                                    </MenuItem>
+                                    {/*TODO: Add more presets here, if necessary*/}
                                 </SubMenu><MenuItem onClick={write_file}>Database</MenuItem>
                                     <MenuItem>Export</MenuItem></>}
                             </Menu>
