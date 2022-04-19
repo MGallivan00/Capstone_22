@@ -1,6 +1,5 @@
 import React, {useState} from "react";
 import "./App.css";
-import Upload from "./Upload.js";
 import Node from "./components/Node";
 import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
@@ -305,17 +304,6 @@ const App = () => {
         window.alert("JSON data is save to " + prop + ".json");
     }
 
-    //fetch from JSON Youtube: https://www.youtube.com/watch?v=aJgAwjP20RY
-    function load_file() {
-        // parse_JSON(JSON_preset);
-        let name = window.prompt("Enter file name ");
-        const test = ref(database,  + 'uploaded/'+name +".json");
-        return onValue(test), (snapshot) => {
-            const test2 = (snapshot.val() && snapshot.val().test2) || 'Testing';
-            parse_JSON(test)
-        },
-            {onlyOnce: true}
-    }
 
     function loadCSharp_JSON(){
         //var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/pique-csharp-sec-model[4389].json');
@@ -489,9 +477,19 @@ const App = () => {
      * @function
      */
     function load_preset(name) {
-        let filename = name + ".json"
-        let JSON_preset = require(`./presets/${filename}`)
+        let filename = name + ".json",
+            JSON_preset = require(`./presets/${filename}`);
         parse_JSON(JSON_preset);
+    }
+
+    /**
+     * Prompts user for file name
+     */
+    function load_file() {
+        let name = window.prompt("Enter file name (without the file extension)"),
+            filename = name + ".json",
+            loaded_JSON = require(`./user_uploads/${filename}`);
+        parse_JSON(loaded_JSON);
     }
 
     function write_file() {
@@ -636,8 +634,7 @@ const App = () => {
                         {/* Menu Interface */}
                         <div className="Menu">
                             <Menu menuButton={<MenuButton className="btn-primary">Menu</MenuButton>}>
-                                <MenuItem> <Upload /></MenuItem>
-
+                                <MenuItem onClick={load_file}>Upload</MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
                                     {/*<MenuItem id="csharp" value="test" onClick={function(){load_preset("csharp")}}>Csharp Model</MenuItem>*/}
