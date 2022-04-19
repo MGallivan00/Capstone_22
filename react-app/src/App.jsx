@@ -231,7 +231,6 @@ const App = () => {
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t);
         export_to_JSON(fileName);
-        //const filepath2 = 'Capstone_22/react-app/src/presets/testing.json';
         const filepath = 'presets'+fileName+'.json';
         parse_JSON(filepath);
     }
@@ -305,11 +304,10 @@ const App = () => {
     }
 
 
-    function loadCSharp_JSON(){
-        //var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/pique-csharp-sec-model[4389].json');
-        var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/testing.json');
-        parse_JSON(cRef)
-    }
+    // function loadCSharp_JSON(){
+    //     //var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/pique-csharp-sec-model[4389].json');
+    //     parse_JSON(cRef)
+    //
     
 
     /**
