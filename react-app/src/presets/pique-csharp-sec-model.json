@@ -14,16 +14,16 @@
           "description": "Total software quality",
           "children": {
             "QualityAspect 01": {
-  
+
             },
             "QualityAspect 02": {
-  
+
             },
             "QualityAspect 03": {
-  
+
             },
             "QualityAspect 04": {
-  
+
             }
           }
         }
@@ -33,7 +33,7 @@
           "description": "Performance",
           "children": {
             "ProductFactor 01": {
-  
+
             }
           }
         },
@@ -41,7 +41,7 @@
           "description": "Compatibility",
           "children": {
             "ProductFactor 02": {
-  
+
             }
           }
         },
@@ -49,10 +49,10 @@
           "description": "Maintainability",
           "children": {
             "ProductFactor 03": {
-  
+
             },
             "ProductFactor 04": {
-  
+
             }
           }
         },
@@ -60,10 +60,10 @@
           "description": "Security",
           "children": {
             "ProductFactor 05": {
-  
+
             },
             "ProductFactor 06": {
-  
+
             }
           }
         }
@@ -73,7 +73,7 @@
           "description": "Runtime",
           "children": {
             "Measure 02": {
-  
+
             }
           }
         },
@@ -81,7 +81,7 @@
           "description": "Interoperability",
           "children": {
             "Measure 03": {
-  
+
             }
           }
         },
@@ -89,10 +89,10 @@
           "description": "Modifiability",
           "children": {
             "Measure 01": {
-  
+
             },
             "Measure 04": {
-  
+
             }
           }
         },
@@ -100,10 +100,10 @@
           "description": "Reusability",
           "children": {
             "Measure 02": {
-  
+
             },
             "Measure 04": {
-  
+
             }
           }
         },
@@ -111,7 +111,7 @@
           "description": "Confidentiality",
           "children": {
             "Measure 03": {
-  
+
             }
           }
         },
@@ -119,10 +119,10 @@
           "description": "Integrity",
           "children": {
             "Measure 02": {
-  
+
             },
             "Measure 04": {
-  
+
             }
           }
         }
@@ -134,7 +134,7 @@
         "positive": false,
         "children": {
           "RCS1036": {
-  
+
           }
         }
       },
@@ -143,13 +143,13 @@
         "positive": false,
         "children": {
           "CS0649": {
-  
+
           },
           "RCS1163": {
-  
+
           },
           "RCS1213": {
-  
+
           }
         }
       },
@@ -158,7 +158,7 @@
         "positive": false,
         "children": {
           "SCS0004": {
-  
+
           }
         }
       },
@@ -167,7 +167,7 @@
         "positive": false,
         "children": {
           "VSTHRD200": {
-  
+
           }
         }
       }
