@@ -42,4 +42,10 @@ From here you can navigate to the menu and load presets, save your tree or uploa
 
 ## Step 6- Making a tree <a name="6"></a>
 
+You can now drag and drop the node that says drag me in the bottom left to any where on the screen. Once the node is dropped onto the screen the bottom popup is displayed for the user to enter their desired information.
+
 ![Tree](/images/nodeDragNdrop.png)
+
+Users can populate the screen with as many nodes as they wish for the tree. Users will also need to connect the nodes to their parent to do this the user will click on the parent node and then click add connections at the top then select its children. Pictured below is this process.
+
+![connect](/images/connect.png)
