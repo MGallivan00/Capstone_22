@@ -49,7 +49,7 @@ const
     database = getDatabase(),
     dbstorage = getStorage();
 
-// Options for Node Types
+// Possible Node Types
 const options = [
     {value:"tqi", label: 'TQI'},
     {value:"quality_aspects", label: 'Quality Aspects'},
@@ -138,10 +138,9 @@ const App = () => {
      * that is used in creating the model that is exported to the user.
      * @const
      */
-    const handleDropDynamic = () => {
+    const handleDropDynamic = (e) => {
         let l = nodes.length;
-        // TODO: If this can be implemented, it should drop the node on the screen at the location it is dropped.
-        // let { x, y } = e.target.getBoundingClientRect();
+        let { x, y } = e.target.getBoundingClientRect();
         let object = TYPE[0];
         while (checkExistence("node" + l)) l++;
         if(nodeName === ""){
@@ -154,11 +153,9 @@ const App = () => {
             desc: nodeDesc,
             type: nodeType,
             children: [],
-            positive: is_positive,
-            t_name: toolName,
             x: 500,
             y: 500,
-            // TODO: The x and y coordinates should be the location where the node is dropped, but it's not working?
+            // The x and y coordinates should be the location where the node is dropped, but it's not working?
             // x: e.clientX - x,
             // y: e.clientY - y,
             shape: object};
@@ -197,8 +194,6 @@ const App = () => {
                 model_object.diagnostics[nodeName].description = nodeDesc;
                 model_object.diagnostics[nodeName].toolName = toolName;
                 break;
-            default:
-                console.log("Key:Value pair not in model.");
         }
     }
 
@@ -219,18 +214,19 @@ const App = () => {
         type.innerHTML = storage[index].type.toString();
     }
 
-    /**
-     * Prompts user for file name and creates a JSON file that is downloaded the user's
-     * downloads folder.
-     * @function
-     */
+    // Prompts user for file name
     function nameFile(){
+        //var filepath = "presets/"+ fileName;
+        //parse_JSON(filepath);
+        // parse_JSON(JSON_preset);
+        // console.log(typeof JSON_preset);
+
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t);
         export_to_JSON(fileName);
-        // const filepath = 'presets'+fileName+'.json';
-        // parse_JSON(filepath);
+        const filepath = 'presets'+fileName+'.json';
+        parse_JSON(filepath);
     }
 
     /**
@@ -272,8 +268,6 @@ const App = () => {
                         }
                     }
                     break;
-                default:
-                    console.log("Cannot add node to model.");
             }
         }
         for (let name in measures) {
@@ -296,12 +290,16 @@ const App = () => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
         a.click();
+        //saves the json to the DB under the same name that the user entered
         let storageRef = ref(dbstorage, 'uploaded/' + prop);
         uploadBytes(storageRef, data).then((snapshot) => {
             console.log('Uploaded a blob or file!');
         });
         window.alert("JSON data is save to " + prop + ".json");
     }
+
+
+    
 
     /**
      * Takes the incoming JSON file that needs to be stored into a JSON object locally,
@@ -326,9 +324,7 @@ const App = () => {
                             data,
                             tqi_type[data].description,
                             factor,
-                            tqi_type[data].children,
-                            null,
-                            null
+                            tqi_type[data].children
                         )
                     }
                     break;
@@ -339,9 +335,7 @@ const App = () => {
                             data,
                             qa_type[data].description,
                             factor,
-                            qa_type[data].children,
-                            null,
-                            null
+                            qa_type[data].children
                         )
                     }
                     break;
@@ -352,24 +346,14 @@ const App = () => {
                             data,
                             pf_type[data].description,
                             factor,
-                            pf_type[data].children,
-                            null,
-                            null
+                            pf_type[data].children
                         )
                     }
                     break;
-                default:
-                    console.log("Key:Value pair not in model.");
             }
         }
         // handles model name
-        store_node_from_JSON(
-            name,
-            "",
-            "name",
-            null,
-            null,
-            null);
+        store_node_from_JSON(name, "", "name", null);
 
         // TODO: include the positive boolean field for measures and the tool name for diagnostics
         for (let data in measures) {
@@ -377,9 +361,7 @@ const App = () => {
                 data,
                 measures[data].description,
                 "measures",
-                measures[data].children,
-                measures[data].positive,
-                null
+                measures[data].children
             )
         }
         for (let data in diagnostics) {
@@ -387,70 +369,16 @@ const App = () => {
                 data,
                 diagnostics[data].description,
                 "diagnostics",
-                diagnostics[data].children,
-                null,
-                diagnostics[data].toolName
+                diagnostics[data].children
             )
-        }
-        // TODO: Copy JSON into model_object
-        console.log(storage);
-        populate_model();
-        console.log(model_object);
-    }
-
-    /**
-     * Populates the model object when a file is uploaded. The store_node_from_JSON function only populates the
-     * local storage array that holds the node info necessary for populating the screen. Without this function,
-     * a blank file will be exported.
-     * @function
-     */
-    function populate_model() {
-        for (let i = 0; i < storage.length; i++) {
-            let nodeType = storage[i].type,
-                nodeName = storage[i].id,
-                nodeDesc = storage[i].desc,
-                is_positive = storage[i].positive,
-                toolName = storage[i].t_name;
-            switch (nodeType) {
-                case "name":
-                    model_object.name = nodeName;
-                    break;
-                case "tqi":
-                    model_object.factors.tqi[nodeName] = {};
-                    model_object.factors.tqi[nodeName].description = nodeDesc;
-                    model_object.factors.tqi[nodeName].children = {};
-                    break;
-                case "quality_aspects":
-                    model_object.factors.quality_aspects[nodeName] = {};
-                    model_object.factors.quality_aspects[nodeName].description = nodeDesc;
-                    model_object.factors.quality_aspects[nodeName].children = {};
-                    break;
-                case "product_factors":
-                    model_object.factors.product_factors[nodeName] = {};
-                    model_object.factors.product_factors[nodeName].description = nodeDesc;
-                    model_object.factors.product_factors[nodeName].children = {};
-                    break;
-                case "measures":
-                    model_object.measures[nodeName] = {};
-                    model_object.measures[nodeName].description = nodeDesc;
-                    model_object.measures[nodeName].positive = is_positive;
-                    model_object.measures[nodeName].children = {};
-                    break;
-                case "diagnostics":
-                    model_object.diagnostics[nodeName] = {};
-                    model_object.diagnostics[nodeName].description = nodeDesc;
-                    model_object.diagnostics[nodeName].toolName = toolName;
-                    break;
-                default:
-                    console.log("Key:Value pair not in model.");
-            }
         }
     }
 
     // variables to remember number of each type of node passed to store_node_from_JSON
-    let t, c = 0;
+    let t;
+    let c = 0;
     // Formats incoming JSON into the proper format for viewing on screen
-    function store_node_from_JSON(nodeName, nodeDesc, nodeType, nodeChildren, isPositive, toolName){
+    function store_node_from_JSON(nodeName, nodeDesc, nodeType, nodeChildren){
         let object = TYPE[0],
             nodewidth = nodeName.toString().length,
             xpos, ypos;
@@ -475,9 +403,8 @@ const App = () => {
             case "diagnostics":
                 ypos = 660;
                 break;
-            default:
-                console.log("Node has no place in model.");
         }
+        //console.log(t + " : "  + nodeType)
         if(t !== nodeType){
             c = 0;
             t = nodeType;
@@ -487,23 +414,24 @@ const App = () => {
         //sets x placement of node by number type already places
         //xpos = 850 + c*150*(Math.pow(-1, storage.length % 2)); //more centered
         xpos = 250 - nodewidth*3.2 + c*200; //left justified
+        //console.log(nodeName + " Storage length: " + storage.length + " x: " + xpos + " y: " + ypos);
 
-        // TODO: How to handle global config info?
+        // TODO: Add if-block to handle name and global_config info?
         //creates the node from load
         let newNode = {
             id: nodeName,
             desc: nodeDesc,
             type: nodeType,
             children: nodeChildren,
-            positive: isPositive,
-            t_name: toolName,
             x: xpos,
             y: ypos,
             shape: object};
         setNodes([...nodes, newNode]);
         storage.push(newNode);
+        //console.log(storage);
         for (let k in nodeChildren) {
             let p = {props: {start: nodeName, end: k}};
+            //console.log(p);
             setLines([...lines, p]);
             childlines.push(p);
         }
@@ -544,8 +472,7 @@ const App = () => {
     }
 
     /**
-     * Prompts user for file name and loads a user provided file that must be located within the
-     * user_uploads folder.
+     * Prompts user for file name
      */
     function load_file() {
         let name = window.prompt("Enter file name (without the file extension)"),
@@ -711,8 +638,7 @@ const App = () => {
                                     >Bin Model
                                     </MenuItem>
                                     {/*TODO: Add more presets here, if necessary*/}
-                                </SubMenu><MenuItem onClick={write_file}>Database</MenuItem>
-                                    <MenuItem>Export</MenuItem></>}
+                                </SubMenu></>}
                             </Menu>
                         </div>
                     </div>
