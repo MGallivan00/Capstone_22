@@ -34,4 +34,4 @@ Now that the required packages have been installed you can launch the app, to do
 
 Navigate to your web browser and you should see a blue home page with a menu in the top right and a drag me node in the bottom left. This is seen in the image below.
 
-![One](/images/backgound.png)
+![One](/images/background.png)
