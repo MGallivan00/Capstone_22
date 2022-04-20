@@ -13,7 +13,10 @@ Apr 20 2022 <br />
 
 ## Step 1-Repo set up and clone] <a name="1"></a>
 
-Create a folder somewhere that you want to save the GitHub project to, after this in the terminal navigate to said folder and pull the code from github with the command'''git clone https://github.com/MGallivan00/Capstone_22.git'''
+Create a folder somewhere that you want to save the GitHub project to, after this in the terminal navigate to said folder and pull the code from github with the command
+'''
+git clone https://github.com/MGallivan00/Capstone_22.git
+'''
 
 ## Step 2-Swap branches <a name="2"></a>
 
