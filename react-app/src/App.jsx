@@ -48,12 +48,6 @@ const
     analytics = getAnalytics(app),
     database = getDatabase(),
     dbstorage = getStorage();
-   // storageRef = ref(dbstorage,'uploaded/filename');
-
-//function storageRef(prop)
-//{
-//    ref(dbstorage, 'uploaded/'+ prop);
-//}
 
 // Possible Node Types
 const options = [
@@ -296,6 +290,7 @@ const App = () => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
         a.click();
+        //saves the json to the DB under the same name that the user entered
         let storageRef = ref(dbstorage, 'uploaded/' + prop);
         uploadBytes(storageRef, data).then((snapshot) => {
             console.log('Uploaded a blob or file!');
@@ -304,10 +299,6 @@ const App = () => {
     }
 
 
-    // function loadCSharp_JSON(){
-    //     //var cRef = ref(dbstorage,'gs://capstone-pique.appspot.com/pique-csharp-sec-model[4389].json');
-    //     parse_JSON(cRef)
-    //
     
 
     /**
@@ -647,8 +638,7 @@ const App = () => {
                                     >Bin Model
                                     </MenuItem>
                                     {/*TODO: Add more presets here, if necessary*/}
-                                </SubMenu><MenuItem onClick={write_file}>Database</MenuItem>
-                                    <MenuItem>Export</MenuItem></>}
+                                </SubMenu></>}
                             </Menu>
                         </div>
                     </div>
