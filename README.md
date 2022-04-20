@@ -6,13 +6,19 @@ Apr 20 2022 <br />
 
 
 # Table of Contents
-1. [Step 1](#1)
-2. [Task 1.2](#1.2)
+1. [Repo set up and clone](#1)
+2. [Swap branches](#2)
+3. [Install packages](#3)
 
 
-## Step 1 <a name="1"></a>
+## Step 1-Repo set up and clone] <a name="1"></a>
 
+Create a folder somewhere that you want to save the GitHub project to, after this in the terminal navigate to said folder and pull the code from github with the command 'git clone https://github.com/MGallivan00/Capstone_22.git'
 
-The image above shows the described task of 1.1 where i print out the environment variables.
+## Step 2-Swap branches <a name="2"></a>
 
-## Task 1.2 <a name="1.2"></a>
+verify what branch you are in, with 'git branch', if not in base_prototype run the command 'git checkout base_prototype'
+
+## Step 3- Install packages <a name="3"></a>
+
+cd in to the react app folder with in the project, then run npm install to install all required packages
