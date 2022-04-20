@@ -34,4 +34,12 @@ Now that the required packages have been installed you can launch the app, to do
 
 Navigate to your web browser and you should see a blue home page with a menu in the top right and a drag me node in the bottom left. This is seen in the image below.
 
-![One](/images/background.png)
+![background](/images/background.png)
+
+From here you can navigate to the menu and load presets, save your tree or upload an existing tree that you have created previously. The menu is pictured below.
+
+![menu](/images/menu.png)
+
+## Step 6- Making a tree <a name="6"></a>
+
+![Tree](/images/nodeDragNdrop.png)
