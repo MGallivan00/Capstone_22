@@ -10,7 +10,10 @@ Apr 20 2022 <br />
 2. [Swap branches](#2)
 3. [Install packages](#3)
 4. [Launching the app](#4)
-4. [Using the app](#5)
+5. [Using the app](#5)
+6. [Making a tree](#6)
+7. [Save tree](#7)
+8. [Load tree](#8)
 
 
 ## Step 1-Repo set up and clone] <a name="1"></a>
@@ -49,3 +52,19 @@ You can now drag and drop the node that says drag me in the bottom left to any w
 Users can populate the screen with as many nodes as they wish for the tree. Users will also need to connect the nodes to their parent to do this the user will click on the parent node and then click add connections at the top then select its children. Pictured below is this process.
 
 ![connect](/images/connect.png)
+
+## Step 7- Save Tree <a name="7"></a>
+
+Now that a tree has been created the user can save it to local storage in the users download folder and to the database. this is done by selecting menu and clicking on save, no need to fill in the file extension the program makes it a legible JSON.
+
+
+## Step 8- Load Tree <a name"8"></a>
+
+The user will need to move the JSON from their download folder to the "user_uploads" folder within the src folder of the project. Once the JSON is in the "user_uploads" folder they can select upload. the user will be promoted to enter the file name, if it matches then the file is loaded.
+
+
+
+
+## Special notes
+
+currently the Google firebase is linked to a personal account, in order to view the data base the host of the database needs to invite each user. In its current form the database is backup storage. In an actual deployment a new firebase will need to made or comment out the lines associated with the database if its scrapped. to implement a new firebase the user would just need to make a project through google and then replace the `const firebaseConfig` with the apr.jsk
