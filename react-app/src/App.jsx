@@ -296,6 +296,7 @@ const App = () => {
             setTimeout(() => URL.revokeObjectURL(a.href), 30 * 1000);
         });
         a.click();
+        //saves the json to the DB under the same name that the user entered
         let storageRef = ref(dbstorage, 'uploaded/' + prop);
         uploadBytes(storageRef, data).then((snapshot) => {
             console.log('Uploaded a blob or file!');
@@ -711,8 +712,7 @@ const App = () => {
                                     >Bin Model
                                     </MenuItem>
                                     {/*TODO: Add more presets here, if necessary*/}
-                                </SubMenu><MenuItem onClick={write_file}>Database</MenuItem>
-                                    <MenuItem>Export</MenuItem></>}
+                                </SubMenu></>}
                             </Menu>
                         </div>
                     </div>
