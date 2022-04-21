@@ -14,6 +14,7 @@ Apr 20 2022 <br />
 6. [Making a tree](#6)
 7. [Save tree](#7)
 8. [Load tree](#8)
+9. [Special notes](#9)
 
 
 ## Step 1-Repo set up and clone] <a name="1"></a>
@@ -65,6 +66,6 @@ The user will need to move the JSON from their download folder to the "user_uplo
 
 
 
-## Special notes
+## Special notes <a name"9"></a>
 
 currently the Google firebase is linked to a personal account, in order to view the data base the host of the database needs to invite each user. In its current form the database is backup storage. In an actual deployment a new firebase will need to made or comment out the lines associated with the database if its scrapped. to implement a new firebase the user would just need to make a project through google and then replace the `const firebaseConfig` with the apr.jsk
