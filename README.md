@@ -59,13 +59,13 @@ Users can populate the screen with as many nodes as they wish for the tree. User
 Now that a tree has been created the user can save it to local storage in the users download folder and to the database. this is done by selecting menu and clicking on save, no need to fill in the file extension the program makes it a legible JSON.
 
 
-## Step 8- Load Tree <a name"8"></a>
+## Step 8- Load Tree <a name="8"></a>
 
 The user will need to move the JSON from their download folder to the "user_uploads" folder within the src folder of the project. Once the JSON is in the "user_uploads" folder they can select upload. the user will be promoted to enter the file name, if it matches then the file is loaded.
 
 
 
 
-## Special notes <a name"9"></a>
+## Special notes <a name="9"></a>
 
-currently the Google firebase is linked to a personal account, in order to view the data base the host of the database needs to invite each user. In its current form the database is backup storage. In an actual deployment a new firebase will need to made or comment out the lines associated with the database if its scrapped. to implement a new firebase the user would just need to make a project through google and then replace the `const firebaseConfig` with the apr.jsk
+currently the Google firebase is linked to a personal account, in order to view the data base the host of the database needs to invite each user. In its current form the database is backup storage. In an actual deployment a new firebase will need to made or comment out the lines associated with the database if its scrapped. to implement a new firebase the user would just need to make a project through google and then replace the `const firebaseConfig` with the apr.jsx
