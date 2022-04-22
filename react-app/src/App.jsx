@@ -166,40 +166,6 @@ const App = () => {
         storage.push(newNode);
         console.log(storage);
         closeForm();
-        // Pushes node entry into JSON model object to match expected format
-        switch (nodeType) {
-            case "name":
-                model_object.name = nodeName;
-                break;
-            case "tqi":
-                model_object.factors.tqi[nodeName] = {};
-                model_object.factors.tqi[nodeName].description = nodeDesc;
-                model_object.factors.tqi[nodeName].children = {};
-                break;
-            case "quality_aspects":
-                model_object.factors.quality_aspects[nodeName] = {};
-                model_object.factors.quality_aspects[nodeName].description = nodeDesc;
-                model_object.factors.quality_aspects[nodeName].children = {};
-                break;
-            case "product_factors":
-                model_object.factors.product_factors[nodeName] = {};
-                model_object.factors.product_factors[nodeName].description = nodeDesc;
-                model_object.factors.product_factors[nodeName].children = {};
-                break;
-            case "measures":
-                model_object.measures[nodeName] = {};
-                model_object.measures[nodeName].description = nodeDesc;
-                model_object.measures[nodeName].positive = is_positive;
-                model_object.measures[nodeName].children = {};
-                break;
-            case "diagnostics":
-                model_object.diagnostics[nodeName] = {};
-                model_object.diagnostics[nodeName].description = nodeDesc;
-                model_object.diagnostics[nodeName].toolName = toolName;
-                break;
-            default:
-                console.log("Key:Value pair not in model.");
-        }
     }
 
     /**
@@ -225,12 +191,11 @@ const App = () => {
      * @function
      */
     function nameFile(){
+        populate_model();
         let d = new Date();
         let t = d.getMonth() + "_" + d.getDay() + "_" + d.getHours() + ":" + d.getMinutes();
         let fileName = window.prompt("Enter the filename: ", t);
         export_to_JSON(fileName);
-        // const filepath = 'presets'+fileName+'.json';
-        // parse_JSON(filepath);
     }
 
     /**
@@ -286,7 +251,7 @@ const App = () => {
 
     function export_to_JSON(prop) {
         lines.forEach(addChildren);
-        console.log(JSON.stringify(model_object));
+        // console.log(JSON.stringify(model_object));
         storage.sort((a, b) => (a.type > b.type) ? 1 : -1);
         const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
         const a = document.createElement('a');
@@ -305,8 +270,8 @@ const App = () => {
     }
 
     /**
-     * Takes the incoming JSON file that needs to be stored into a JSON object locally,
-     * parses though it and adds entries to our local storage object. Later that object
+     * The incoming JSON file is stored as a local object and passed into this function, it
+     * parses though it and adds entries to our local storage object. Later that object storage
      * is iterated over and the nodes are populated onto the screen.
      * @function
      */
@@ -371,8 +336,7 @@ const App = () => {
             null,
             null,
             null);
-
-        // TODO: include the positive boolean field for measures and the tool name for diagnostics
+        // measures
         for (let data in measures) {
             store_node_from_JSON(
                 data,
@@ -383,6 +347,7 @@ const App = () => {
                 null
             )
         }
+        // diagnostics
         for (let data in diagnostics) {
             store_node_from_JSON(
                 data,
@@ -394,9 +359,9 @@ const App = () => {
             )
         }
         // TODO: Copy JSON into model_object
-        console.log(storage);
+        // console.log(storage);
         populate_model();
-        console.log(model_object);
+        // console.log(model_object);
     }
 
     /**
@@ -410,6 +375,7 @@ const App = () => {
             let nodeType = storage[i].type,
                 nodeName = storage[i].id,
                 nodeDesc = storage[i].desc,
+                children = storage[i].children,
                 is_positive = storage[i].positive,
                 toolName = storage[i].t_name;
             switch (nodeType) {
@@ -419,23 +385,23 @@ const App = () => {
                 case "tqi":
                     model_object.factors.tqi[nodeName] = {};
                     model_object.factors.tqi[nodeName].description = nodeDesc;
-                    model_object.factors.tqi[nodeName].children = {};
+                    model_object.factors.tqi[nodeName].children = children;
                     break;
                 case "quality_aspects":
                     model_object.factors.quality_aspects[nodeName] = {};
                     model_object.factors.quality_aspects[nodeName].description = nodeDesc;
-                    model_object.factors.quality_aspects[nodeName].children = {};
+                    model_object.factors.quality_aspects[nodeName].children = children;
                     break;
                 case "product_factors":
                     model_object.factors.product_factors[nodeName] = {};
                     model_object.factors.product_factors[nodeName].description = nodeDesc;
-                    model_object.factors.product_factors[nodeName].children = {};
+                    model_object.factors.product_factors[nodeName].children = children;
                     break;
                 case "measures":
                     model_object.measures[nodeName] = {};
                     model_object.measures[nodeName].description = nodeDesc;
                     model_object.measures[nodeName].positive = is_positive;
-                    model_object.measures[nodeName].children = {};
+                    model_object.measures[nodeName].children = children;
                     break;
                 case "diagnostics":
                     model_object.diagnostics[nodeName] = {};
