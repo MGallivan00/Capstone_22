@@ -1,6 +1,6 @@
 # Capstone_22
 
-Created by- Maria Gallivan, Dawson Kanehl, Connor Lowe, Zoe Norden <br />
+Created by- Maria Gallivan, Dawson Kanehl, Zoe Norden, Connor Snow <br />
 CSCI 483 <br />
 Apr 20 2022 <br />
 
