@@ -64,3 +64,16 @@ The user will need to move the JSON from their download folder to the "user_uplo
 ## Special notes <a name="8"></a>
 
 currently the Google firebase is linked to a personal account, in order to view the data base the host of the database needs to invite each user. In its current form the database is backup storage. In an actual deployment a new firebase will need to made or comment out the lines associated with the database if its scrapped. to implement a new firebase the user would just need to make a project through google and then replace the `const firebaseConfig` with the apr.jsx
+
+
+Ensure your rules in storage are as follows:
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if
+          request.time < timestamp.date(2022, 12, 31);
+    }
+  }
+}
