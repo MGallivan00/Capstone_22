@@ -68,7 +68,7 @@ currently the Google firebase is linked to a personal account, in order to view 
 
 Ensure your rules in storage are as follows:
 
-`rules_version = '2'; <br/>
+rules_version = '2'; <br/>
 service firebase.storage { <br />
   match /b/{bucket}/o { <br />
     match /{allPaths=**} { <br />
@@ -76,4 +76,4 @@ service firebase.storage { <br />
           request.time < timestamp.date(2022, 12, 31); <br />
     }<br />
   }<br />
-}`
+}
