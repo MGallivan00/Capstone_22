@@ -1,3 +1,17 @@
+/**********************
+ * PIQUE (Platform for Investigative software Quality Understanding and Evaluation)
+ * Quality Model Creation GUI
+ * CSCI 483R: Interdisciplinary Capstone Project
+ * Dr. Clemente Izurieta
+ * Spring 2022
+ **********************
+ * Developed by:
+ *  Maria Gallivan
+ *  Dawson Kanehl
+ *  Zoe Norden
+ *  Connor Snow
+ **********************/
+/* Imports */
 import React, {useState} from "react";
 import "./App.css";
 import Node from "./components/Node";
@@ -5,14 +19,23 @@ import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
-import {getDatabase, onValue, set} from "firebase/database";
-import {getStorage,ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {getDatabase, set} from "firebase/database";
+import {getStorage,ref, uploadBytes } from "firebase/storage";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {Button} from 'react-floating-action-button'
 import Select from 'react-select';
 import '@szhsin/react-menu/dist/index.css';
-//import { getScrollTop } from "react-select/dist/declarations/src/utils";
+
+/* Export Functions */
+// This is used in TopBar.jsx for removing nodes, since the button event happens there
+export function remove_node(id) {
+    for(let i = 0; i < storage.length; i++){
+        if ( storage[i].id === id) {
+            storage.splice(i, 1);
+        }
+    }
+}
 
 /* Developed with code forked from:
  * https://github.com/Eliav2/react-xarrows/tree/master/examples
@@ -88,9 +111,6 @@ const
         "diagnostics": {}
     };
 
-// Load from preset variable for testing
-let JSON_preset = {};
-
 const App = () => {
     /* References:
      * https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
@@ -99,18 +119,18 @@ const App = () => {
 
     // Default node values
     let
-        nodeName = "",
-        nodeDesc = "",
-        toolName = "",
+        nodeName = null,
+        nodeDesc = null,
         nodeType = "other",
-        is_positive = false;
+        toolName = null,
+        is_positive = null,
+        selected_node = null;
 
-    const
-        [interfaces, setInterfaces] = useState([]),
-        [nodes, setNodes] = useState([]),
-        [lines, setLines] = useState([]),
-        [selected, setSelected] = useState(null),
-        [actionState, setActionState] = useState("Normal");
+    const [interfaces, setInterfaces] = useState([]);
+    const [nodes, setNodes] = useState([]);
+    const [lines, setLines] = useState([]);
+    const [selected, setSelected] = useState(null);
+    const [actionState, setActionState] = useState("Normal");
 
     // Handles Selected Nodes
     const handleSelect = (e) => {
@@ -138,13 +158,13 @@ const App = () => {
      * that is used in creating the model that is exported to the user.
      * @const
      */
-    const handleDropDynamic = () => {
+    function handleDropDynamic() {
         let l = nodes.length;
         // TODO: If this can be implemented, it should drop the node on the screen at the location it is dropped.
         // let { x, y } = e.target.getBoundingClientRect();
         let object = TYPE[0];
         while (checkExistence("node" + l)) l++;
-        if(nodeName === ""){
+        if(nodeName === null || nodeName === ""){
             nodeName = "node" + l;
         }
         // This adds to the local storage array containing all nodes
@@ -153,7 +173,7 @@ const App = () => {
             id: nodeName,
             desc: nodeDesc,
             type: nodeType,
-            children: [],
+            children: {},
             positive: is_positive,
             t_name: toolName,
             x: 500,
@@ -183,6 +203,39 @@ const App = () => {
         desc.innerHTML = storage[index].desc.toString();
         const type = document.getElementById("info-type");
         type.innerHTML = storage[index].type.toString();
+    }
+
+    function setEdit(selected) {
+        openEdit();
+        selected_node = selected;
+        nodeName = selected.id;
+        nodeDesc = selected.desc;
+        nodeType = selected.type;
+        is_positive = selected.positive;
+        toolName = selected.t_name
+    }
+
+    function changeNodeInfo() {
+        closeEdit();
+        for(let i = 0; i < storage.length; i++){
+            if (storage[i].id === selected_node) {
+                if (storage[i].id !== nodeName) {
+                    storage[i].id = nodeName;
+                }
+                else if (storage[i].desc !== nodeDesc) {
+                    storage[i].desc= nodeDesc;
+                }
+                else if (storage[i].type !== nodeType) {
+                    storage[i].type = nodeType;
+                }
+                else if (storage[i].positive !== is_positive) {
+                    storage[i].positive = is_positive;
+                }
+                else if (storage[i].t_name !== toolName) {
+                    storage[i].t_name = toolName;
+                }
+            }
+        }
     }
 
     /**
@@ -358,10 +411,8 @@ const App = () => {
                 diagnostics[data].toolName
             )
         }
-        // TODO: Copy JSON into model_object
-        // console.log(storage);
+        // Copies loaded JSON into model object for exporting
         populate_model();
-        // console.log(model_object);
     }
 
     /**
@@ -474,6 +525,8 @@ const App = () => {
             setLines([...lines, p]);
             childlines.push(p);
         }
+        console.log(storage);
+        console.log(childlines);
     }
 
     // Displays info popup
@@ -483,6 +536,13 @@ const App = () => {
     // Hides info popup
     function closeInfo() {
         document.getElementById("info").style.display = "none";
+    }
+    // Display edit node information popup
+    function openEdit() {
+        document.getElementById("edit").style.display = "block";
+    }
+    function closeEdit() {
+        document.getElementById("edit").style.display = "none";
     }
     // Displays entry form popup
     function openForm() {
@@ -531,6 +591,7 @@ const App = () => {
         });
     }
 
+
     // Properties
     const props = {
         interfaces,
@@ -538,8 +599,9 @@ const App = () => {
         nodes,
         setNodes,
         selected,
-        handleSelect,
         showInfo,
+        setEdit,
+        handleSelect,
         actionState,
         setActionState,
         lines,
@@ -552,6 +614,7 @@ const App = () => {
         setNodes,
         selected,
         showInfo,
+        setEdit,
         handleSelect,
         actionState,
         setLines,
@@ -603,6 +666,47 @@ const App = () => {
                                 sidePos="middle"
                             />
                         ))}
+                        {/* Edit node popup menu*/}
+                        <div className="edit-popup" id="edit">
+                            <div className="edit-container" id="display-edit">
+                                <h2>Edit Node Information</h2>
+                                <b>Change Node Name</b>
+                                <input type="text"
+                                       placeholder="Name"
+                                       id="inputName"
+                                       onChange={getName}/>
+                                <b>Change Description</b>
+                                <input type="text"
+                                       placeholder="Description"
+                                       id="inputDesc"
+                                       onChange={getDesc}/>
+                                <br/>
+                                <b>Change Classification</b>
+                                <Select id="inputType"
+                                        options={options}
+                                        value={"Other"}
+                                        onChange={getType} />
+                                <br/>
+                                <b>Change Positive? (for Measures)</b>
+                                <Select id="positiveType"
+                                        options={bool_options}
+                                        value={"Bool"}
+                                        onChange={getBool} />
+                                <br/>
+                                <b>Change Tool Name (for Diagnostics)</b>
+                                <input type="text"
+                                       placeholder="Name"
+                                       id="toolName"
+                                       onChange={getTool}/>
+                                {/* Submission Button */}
+                                <Button
+                                    id="submit-btn"
+                                    tooltip="Submit"
+                                    styles={{backgroundColor: "#04AA6D", color: "#FFFFFF"}}
+                                    onClick={changeNodeInfo}
+                                />
+                            </div>
+                        </div>
                         {/* Add Node Popup Menu */}
                         <div className="form-popup" id="popup">
                             <div className="form-container" id="form">
@@ -639,8 +743,10 @@ const App = () => {
                                        onChange={getTool}/>
                                 {/* Submission Button */}
                                 <Button
+                                    id="submit-btn"
                                     tooltip="Submit"
-                                    styles={{backgroundColor: "#04AA6D", color: "#FFFFFF"}} onClick={handleDropDynamic}
+                                    styles={{backgroundColor: "#04AA6D", color: "#FFFFFF"}}
+                                    onClick={handleDropDynamic}
                                 />
                             </div>
                         </div>
@@ -666,7 +772,6 @@ const App = () => {
                                 <MenuItem onClick={load_file}>Upload</MenuItem>
                                 <MenuItem onClick={nameFile}>Save</MenuItem>
                                 {<><SubMenu label="Preset">
-                                    {/*<MenuItem id="csharp" value="test" onClick={function(){load_preset("csharp")}}>Csharp Model</MenuItem>*/}
                                     <MenuItem id="csharp"
                                               value="test"
                                               onClick={function(){load_preset('pique-csharp-sec-model')}}
