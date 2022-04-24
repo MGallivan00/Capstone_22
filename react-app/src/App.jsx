@@ -29,13 +29,13 @@ import '@szhsin/react-menu/dist/index.css';
 
 /* Export Functions */
 // This is used in TopBar.jsx for removing nodes, since the button event happens there
-export function remove_node(id) {
-    for(let i = 0; i < storage.length; i++){
-        if ( storage[i].id === id) {
-            storage.splice(i, 1);
-        }
-    }
-}
+// export function remove_node(id) {
+//     for(let i = 0; i < storage.length; i++){
+//         if ( storage[i].id === id) {
+//             storage.splice(i, 1);
+//         }
+//     }
+// }
 
 /* Developed with code forked from:
  * https://github.com/Eliav2/react-xarrows/tree/master/examples
@@ -127,7 +127,7 @@ const App = () => {
         selected_node = null;
 
     const [interfaces, setInterfaces] = useState([]);
-    const [nodes, setNodes] = useState([]);
+    const [storage, setStorage] = useState([]);
     const [lines, setLines] = useState([]);
     const [selected, setSelected] = useState(null);
     const [actionState, setActionState] = useState("Normal");
@@ -142,7 +142,7 @@ const App = () => {
 
     // Checks existence of nodes
     const checkExistence = (id) => {
-        return [...nodes, ...interfaces].map((b) => b.id).includes(id);
+        return [...storage, ...interfaces].map((b) => b.id).includes(id);
     };
 
     // Get functions for Node properties
@@ -159,7 +159,7 @@ const App = () => {
      * @const
      */
     function handleDropDynamic() {
-        let l = nodes.length;
+        let l = storage.length;
         // TODO: If this can be implemented, it should drop the node on the screen at the location it is dropped.
         // let { x, y } = e.target.getBoundingClientRect();
         let object = TYPE[0];
@@ -182,7 +182,7 @@ const App = () => {
             // x: e.clientX - x,
             // y: e.clientY - y,
             shape: object};
-        setNodes([...nodes, newNode]);
+        setStorage([...storage, newNode]);
         storage.push(newNode);
         console.log(storage);
         closeForm();
@@ -518,7 +518,7 @@ const App = () => {
             x: xpos,
             y: ypos,
             shape: object};
-        setNodes([...nodes, newNode]);
+        setStorage([...storage, newNode]);
         storage.push(newNode);
         for (let k in nodeChildren) {
             let p = {props: {start: nodeName, end: k}};
@@ -596,8 +596,8 @@ const App = () => {
     const props = {
         interfaces,
         setInterfaces,
-        nodes,
-        setNodes,
+        nodes: storage,
+        setNodes: setStorage,
         selected,
         showInfo,
         setEdit,
@@ -610,8 +610,8 @@ const App = () => {
 
     // Node properties
     const nodeProps = {
-        nodes,
-        setNodes,
+        nodes: storage,
+        setNodes: setStorage,
         selected,
         showInfo,
         setEdit,
