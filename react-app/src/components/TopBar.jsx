@@ -1,8 +1,6 @@
 // Forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 import React from 'react';
 import './TopBar.css';
-import {remove_node} from "../App";
-// import {remove_children} from "../App";
 
 const actions = {
     // node: ['Add Connections', 'Remove Connections', 'Delete'],
@@ -19,14 +17,14 @@ const TopBar = (props) => {
         switch (action) {
             case 'Edit Node Information':
                 // props.setEdit(props.selected.id);
-                props.setNodes((nodes) => {
+                props.setNodes((storage) => {
                     let newName = prompt('Enter new name: ');
-                    while ([...nodes, ...props.interfaces].map((a) => a.id).includes(newName))
+                    while ([...storage, ...props.interfaces].map((a) => a.id).includes(newName))
                         newName = prompt('Name already in use, please choose another: ');
                     if (newName === null) {
                         return;
                     }
-                    return nodes.map((node) => (node.id === props.selected.id ? { ...node, id: newName } : node));
+                    return storage.map((node) => (node.id === props.selected.id ? { ...node, id: newName } : node));
                 });
                 break;
             case 'Add Connections':
@@ -65,7 +63,10 @@ const TopBar = (props) => {
                             (line) => !(line.props.root === props.selected.id || line.props.end === props.selected.id)
                         );
                     });
-                    remove_node(props.selected.id);
+                    // if it is a node remove from nodes
+                    if (props.nodes.map((node) => node.id).includes(props.selected.id)) {
+                        props.setNodes((nodes) => nodes.filter((node) => !(node.id === props.selected.id)));
+                    }
                     props.handleSelect(null);
                 }
                 break;
