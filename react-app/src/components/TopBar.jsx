@@ -1,18 +1,24 @@
 // Forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 import React from 'react';
 import './TopBar.css';
-// import MaterialIcon from "material-icons-react";
+import {remove_node} from "../App";
+// import {remove_children} from "../App";
 
 const actions = {
     // node: ['Add Connections', 'Remove Connections', 'Delete'],
-    node: ['Edit Name', 'Add Connections', 'Show Information', 'Delete'],
+    node: [
+        'Edit Node Information',
+        'Show Information',
+        'Add Connections',
+        'Delete Node'],
     arrow: ['Edit Properties', 'Remove Connection'],
 };
 
 const TopBar = (props) => {
     const handleEditAction = (action) => {
         switch (action) {
-            case 'Edit Name':
+            case 'Edit Node Information':
+                // props.setEdit(props.selected.id);
                 props.setNodes((nodes) => {
                     let newName = prompt('Enter new name: ');
                     while ([...nodes, ...props.interfaces].map((a) => a.id).includes(newName))
@@ -51,7 +57,7 @@ const TopBar = (props) => {
                     )
                 );
                 break;
-            case 'Delete':
+            case 'Delete Node':
                 if (window.confirm(`Are you sure you want to delete ${props.selected.id}?`)) {
                     // first remove any lines connected to the node.
                     props.setLines((lines) => {
@@ -59,10 +65,7 @@ const TopBar = (props) => {
                             (line) => !(line.props.root === props.selected.id || line.props.end === props.selected.id)
                         );
                     });
-                    // if it is a node remove from nodes
-                    if (props.nodes.map((node) => node.id).includes(props.selected.id)) {
-                        props.setNodes((nodes) => nodes.filter((node) => !(node.id === props.selected.id)));
-                    }
+                    remove_node(props.selected.id);
                     props.handleSelect(null);
                 }
                 break;

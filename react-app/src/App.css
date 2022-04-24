@@ -102,7 +102,7 @@ div.Menu{
     top:50%;
     left:50%;
     margin-left:-175px;
-    margin-top:-300px;
+    margin-top:-225px;
 }
 
 .form-container {
@@ -114,6 +114,34 @@ div.Menu{
 }
 
 .form-container input[type=text] {
+    width: 75%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    border: none;
+    background: #f1f1f1;
+}
+
+.edit-popup {
+    display: none;
+    border: 3px solid #f1f1f1;
+    border-radius: 5%;
+    z-index: 9;
+    position:absolute;
+    top:50%;
+    left:50%;
+    margin-left:-175px;
+    margin-top:-300px;
+}
+
+.edit-container {
+    max-width: 300px;
+    padding: 10px;
+    background-color: white;
+    color: black;
+    border-radius: 4%;
+}
+
+.edit-container input[type=text] {
     width: 75%;
     padding: 15px;
     margin: 5px 0 22px 0;

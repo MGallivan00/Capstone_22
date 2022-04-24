@@ -1,4 +1,3 @@
-// Forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 import React, { useState } from 'react';
 import Xarrow from 'react-xarrows';
 
@@ -21,15 +20,14 @@ export default ({ setSelected, selected, line: { props } }) => {
         },
     };
     let color = state.color;
-    //if (selected && selected.type === 'arrow' && selected.id.root === props.root && selected.id.end === props.end)
+    if (selected && selected.type === 'arrow' && selected.id.root === props.root && selected.id.end === props.end)
         // selected.stopPropagation();
-        // color = 'red';
+        color = 'red';
     return <Xarrow {...{
         ...defProps,
         ...props,
         ...state,
         color,
-        showHead: false,
-        showTail: true,
+        showHead: true,
         path: "straight"}} />;
 };
