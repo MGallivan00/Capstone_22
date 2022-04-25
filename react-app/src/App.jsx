@@ -20,22 +20,14 @@ import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
 import {getDatabase, set} from "firebase/database";
-import {getStorage,ref, uploadBytes } from "firebase/storage";
+import {getStorage, ref, uploadBytes} from "firebase/storage";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {Button} from 'react-floating-action-button'
 import Select from 'react-select';
 import '@szhsin/react-menu/dist/index.css';
+import {setChanges} from "./components/TopBar";
 
-/* Export Functions */
-// This is used in TopBar.jsx for removing nodes, since the button event happens there
-// export function remove_node(id) {
-//     for(let i = 0; i < storage.length; i++){
-//         if ( storage[i].id === id) {
-//             storage.splice(i, 1);
-//         }
-//     }
-// }
 
 /* Developed with code forked from:
  * https://github.com/Eliav2/react-xarrows/tree/master/examples
@@ -89,6 +81,7 @@ const options = [
 const bool_options = [
     {value: false, label: "False"},
     {value: true, label: "True"}];
+
 const
     // Arrays for storing nodes and lines
     storage = [],
@@ -111,6 +104,14 @@ const
         "diagnostics": {}
     };
 
+let nodeInfo = {
+    nodeName : null,
+    nodeDesc : null,
+    nodeType : "other",
+    toolName : null,
+    is_positive : null
+}
+
 const App = () => {
     /* References:
      * https://www.delftstack.com/howto/javascript/arraylist-in-javascript/
@@ -123,14 +124,16 @@ const App = () => {
         nodeDesc = null,
         nodeType = "other",
         toolName = null,
-        is_positive = null,
-        selected_node = null;
+        is_positive = null;
 
-    const [interfaces, setInterfaces] = useState([]);
-    const [storage, setStorage] = useState([]);
-    const [lines, setLines] = useState([]);
-    const [selected, setSelected] = useState(null);
-    const [actionState, setActionState] = useState("Normal");
+
+    const
+        [interfaces, setInterfaces] = useState([]),
+        [storage, setStorage] = useState([]),
+        [lines, setLines] = useState([]),
+        [selected, setSelected] = useState(null),
+        [actionState, setActionState] = useState("Normal");
+
 
     // Handles Selected Nodes
     const handleSelect = (e) => {
@@ -145,12 +148,34 @@ const App = () => {
         return [...storage, ...interfaces].map((b) => b.id).includes(id);
     };
 
-    // Get functions for Node properties
-    function getName(prop){ nodeName = prop.target.value; }
-    function getDesc(prop){ nodeDesc = prop.target.value; }
-    function getType(prop){ nodeType = prop.value; }
-    function getTool(prop){ toolName = prop.target.value; }
-    function getBool(prop){ is_positive = prop.value; }
+    // Set functions for Node properties
+    function setName(prop){ nodeName = prop.target.value; }
+    function setDesc(prop){ nodeDesc = prop.target.value; }
+    function setType(prop){ nodeType = prop.value; }
+    function setTool(prop){ toolName = prop.target.value; }
+    function setBool(prop){ is_positive = prop.value; }
+
+    // Set functions for node changes
+    function changeName(prop){
+        if (prop.target.value !== nodeName)
+            nodeInfo.nodeName = prop.target.value;
+    }
+    function changeDesc(prop){
+        if (prop.target.value !== nodeDesc)
+            nodeInfo.nodeDesc = prop.target.value;
+    }
+    function changeType(prop){
+        if (prop.value !== nodeInfo)
+            nodeInfo.nodeType = prop.value;
+    }
+    function changeTool(prop){
+        if (prop.target.value !== toolName)
+            nodeInfo.toolName = prop.target.value;
+    }
+    function changeBool(prop){
+        if (prop.value !== is_positive)
+            nodeInfo.is_positive = prop.value;
+    }
 
     /**
      * Handles node drag-drop functionality. Pushes node information into an entry on the local "storage"
@@ -168,7 +193,6 @@ const App = () => {
             nodeName = "node" + l;
         }
         // This adds to the local storage array containing all nodes
-        // TODO: If check for diagnostic or measure node types
         let newNode = {
             id: nodeName,
             desc: nodeDesc,
@@ -206,36 +230,20 @@ const App = () => {
     }
 
     function setEdit(selected) {
-        openEdit();
-        selected_node = selected;
         nodeName = selected.id;
         nodeDesc = selected.desc;
         nodeType = selected.type;
+        toolName = selected.t_name;
         is_positive = selected.positive;
-        toolName = selected.t_name
+        openEdit();
     }
 
     function changeNodeInfo() {
+        setChanges(
+
+        )
         closeEdit();
-        for(let i = 0; i < storage.length; i++){
-            if (storage[i].id === selected_node) {
-                if (storage[i].id !== nodeName) {
-                    storage[i].id = nodeName;
-                }
-                else if (storage[i].desc !== nodeDesc) {
-                    storage[i].desc= nodeDesc;
-                }
-                else if (storage[i].type !== nodeType) {
-                    storage[i].type = nodeType;
-                }
-                else if (storage[i].positive !== is_positive) {
-                    storage[i].positive = is_positive;
-                }
-                else if (storage[i].t_name !== toolName) {
-                    storage[i].t_name = toolName;
-                }
-            }
-        }
+        console.log(nodeInfo);
     }
 
     /**
@@ -525,8 +533,8 @@ const App = () => {
             setLines([...lines, p]);
             childlines.push(p);
         }
-        console.log(storage);
-        console.log(childlines);
+        // console.log(storage);
+        // console.log(childlines);
     }
 
     // Displays info popup
@@ -543,6 +551,9 @@ const App = () => {
     }
     function closeEdit() {
         document.getElementById("edit").style.display = "none";
+        document.getElementById("inputName").value = "";
+        document.getElementById("inputDesc").value = "";
+        document.getElementById("toolName").value = "";
     }
     // Displays entry form popup
     function openForm() {
@@ -674,35 +685,35 @@ const App = () => {
                                 <input type="text"
                                        placeholder="Name"
                                        id="inputName"
-                                       onChange={getName}/>
+                                       onChange={changeName}/>
                                 <b>Change Description</b>
                                 <input type="text"
                                        placeholder="Description"
                                        id="inputDesc"
-                                       onChange={getDesc}/>
+                                       onChange={changeDesc}/>
                                 <br/>
                                 <b>Change Classification</b>
                                 <Select id="inputType"
                                         options={options}
                                         value={"Other"}
-                                        onChange={getType} />
+                                        onChange={changeType} />
                                 <br/>
                                 <b>Change Positive? (for Measures)</b>
                                 <Select id="positiveType"
                                         options={bool_options}
                                         value={"Bool"}
-                                        onChange={getBool} />
+                                        onChange={changeBool} />
                                 <br/>
                                 <b>Change Tool Name (for Diagnostics)</b>
                                 <input type="text"
                                        placeholder="Name"
                                        id="toolName"
-                                       onChange={getTool}/>
+                                       onChange={changeTool}/>
                                 {/* Submission Button */}
                                 <Button
                                     id="submit-btn"
                                     tooltip="Submit"
-                                    styles={{backgroundColor: "#04AA6D", color: "#FFFFFF"}}
+                                    styles={{backgroundColor: "#f65503", color: "#FFFFFF"}}
                                     onClick={changeNodeInfo}
                                 />
                             </div>
@@ -715,12 +726,12 @@ const App = () => {
                                 <input type="text"
                                        placeholder="Name"
                                        id="inputName"
-                                       onChange={getName}/>
+                                       onChange={setName}/>
                                 <b>Description</b>
                                 <input type="text"
                                        placeholder="Description"
                                        id="inputDesc"
-                                       onChange={getDesc}/>
+                                       onChange={setDesc}/>
                                 <br/>
                                 <b>Classification</b>
                                 {/*tqi, quality_aspects, product_factors, measures, diagnostics*/}
@@ -728,19 +739,19 @@ const App = () => {
                                 <Select id="inputType"
                                         options={options}
                                         value={"Other"}
-                                        onChange={getType} />
+                                        onChange={setType} />
                                 <br/>
                                 <b>Positive? (for Measures)</b>
                                 <Select id="positiveType"
                                         options={bool_options}
                                         value={"Bool"}
-                                        onChange={getBool} />
+                                        onChange={setBool} />
                                 <br/>
                                 <b>Tool Name (for Diagnostics)</b>
                                 <input type="text"
                                        placeholder="Name"
                                        id="toolName"
-                                       onChange={getTool}/>
+                                       onChange={setTool}/>
                                 {/* Submission Button */}
                                 <Button
                                     id="submit-btn"
