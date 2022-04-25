@@ -1,9 +1,23 @@
 // Forked from: https://github.com/Eliav2/react-xarrows/tree/master/examples
 import React from 'react';
 import './TopBar.css';
+export function setChanges(name, desc, type, t_name, pos) {
+    nodeInfo.nodeName = name;
+    nodeInfo.nodeDesc = desc;
+    nodeInfo.nodeType = type;
+    nodeInfo.toolName = t_name;
+    nodeInfo.is_positive = pos;
+}
+
+let nodeInfo = {
+    nodeName : null,
+    nodeDesc : null,
+    nodeType : "other",
+    toolName : null,
+    is_positive : null
+}
 
 const actions = {
-    // node: ['Add Connections', 'Remove Connections', 'Delete'],
     node: [
         'Edit Node Information',
         'Show Information',
@@ -16,16 +30,17 @@ const TopBar = (props) => {
     const handleEditAction = (action) => {
         switch (action) {
             case 'Edit Node Information':
-                // props.setEdit(props.selected.id);
-                props.setNodes((storage) => {
-                    let newName = prompt('Enter new name: ');
-                    while ([...storage, ...props.interfaces].map((a) => a.id).includes(newName))
-                        newName = prompt('Name already in use, please choose another: ');
-                    if (newName === null) {
-                        return;
-                    }
-                    return storage.map((node) => (node.id === props.selected.id ? { ...node, id: newName } : node));
-                });
+                props.setEdit(props.selected.id);
+                console.log(nodeInfo);
+                // props.setNodes((storage) => {
+                //     let newName = prompt('Enter new name: ');
+                //     while ([...storage, ...props.interfaces].map((a) => a.id).includes(newName))
+                //         newName = prompt('Name already in use, please choose another: ');
+                //     if (newName === null) {
+                //         return;
+                //     }
+                //     return storage.map((node) => (node.id === props.selected.id ? { ...node, id: newName } : node));
+                // });
                 break;
             case 'Add Connections':
                 props.setActionState(action);

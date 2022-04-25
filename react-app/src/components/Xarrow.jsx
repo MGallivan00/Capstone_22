@@ -28,6 +28,7 @@ export default ({ setSelected, selected, line: { props } }) => {
         ...props,
         ...state,
         color,
-        showHead: true,
+        // TODO: You can change this field to true to show the heads
+        showHead: false,
         path: "straight"}} />;
 };
