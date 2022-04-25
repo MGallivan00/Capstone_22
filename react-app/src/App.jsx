@@ -28,7 +28,6 @@ import Select from 'react-select';
 import '@szhsin/react-menu/dist/index.css';
 import {setChanges} from "./components/TopBar";
 
-
 /* Developed with code forked from:
  * https://github.com/Eliav2/react-xarrows/tree/master/examples
  */
