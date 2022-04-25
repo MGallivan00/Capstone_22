@@ -11,6 +11,7 @@
  *  Zoe Norden
  *  Connor Snow
  **********************/
+
 /* Imports */
 import React, {useState} from "react";
 import "./App.css";
@@ -19,7 +20,7 @@ import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
-import {getDatabase, set} from "firebase/database";
+import {getDatabase, onValue, set} from "firebase/database";
 import {getStorage, ref, uploadBytes} from "firebase/storage";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
@@ -180,7 +181,7 @@ const App = () => {
      * Handles node drag-drop functionality. Pushes node information into an entry on the local "storage"
      * array. In addition, when a node is added a properly formatted JSON object is pushed onto the "model_object"
      * that is used in creating the model that is exported to the user.
-     * @const
+     * @function
      */
     function handleDropDynamic() {
         let l = storage.length;
@@ -311,7 +312,6 @@ const App = () => {
 
     function export_to_JSON(prop) {
         lines.forEach(addChildren);
-        // console.log(JSON.stringify(model_object));
         storage.sort((a, b) => (a.type > b.type) ? 1 : -1);
         const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
         const a = document.createElement('a');
@@ -589,16 +589,6 @@ const App = () => {
             filename = name + ".json",
             loaded_JSON = require(`./user_uploads/${filename}`);
         parse_JSON(loaded_JSON);
-    }
-
-    function write_file() {
-        let branch = window.prompt("Enter the branch name: ");
-        let name = window.prompt("Enter the file name: ");
-
-
-        set(ref(database, branch+'/'+name + '/'), {
-            name: name,
-        });
     }
 
 
