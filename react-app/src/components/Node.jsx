@@ -45,8 +45,8 @@ const Node = (props) => {
             ).length > 0)
     ) {
         background = "#ffeb33";
-        // Keep the model name the normal color to imply that you don't draw connections to it
-        if (props.node.type === "name") {
+        // Keep the model name and the config nodes the normal color to imply that you don't draw connections to it
+        if ((props.node.type === "name") || (props.node.type === "global_config")) {
             background = "#00b1e1"
         }
     }

@@ -20,14 +20,13 @@ import TopBar from "./components/TopBar";
 import Xarrow from "./components/Xarrow";
 import {Xwrapper} from "react-xarrows";
 import {Menu, MenuButton, MenuItem, SubMenu} from '@szhsin/react-menu';
-import {getDatabase, onValue, set} from "firebase/database";
+import {getDatabase} from "firebase/database";
 import {getStorage, ref, uploadBytes} from "firebase/storage";
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {Button} from 'react-floating-action-button'
 import Select from 'react-select';
 import '@szhsin/react-menu/dist/index.css';
-import {setChanges} from "./components/TopBar";
 
 /* Developed with code forked from:
  * https://github.com/Eliav2/react-xarrows/tree/master/examples
@@ -74,13 +73,15 @@ const options = [
     {value:"name", label:'Model Name'},
     {value:"additionalData", label:'Additional Data'},
     {value:"global_config", label:'Global Config Information'}];
-    // TODO: Do we include these as options, or do we just have the user manually fill it in later?
-    // {value:"benchmark_strategy", label:'Benchmark Strategy'},
-    // {value:"normalizer_strategy", label:'Normalizer Strategy'}];
 
 const bool_options = [
     {value: false, label: "False"},
     {value: true, label: "True"}];
+
+const config_options = [
+    {value: "benchmark_strategy", label: "Benchmark Strategy"},
+    {value: "weights_strategy", label: "Weights Strategy"},
+    {value: "normalizer", label: "Normalizer"}];
 
 const
     // Arrays for storing nodes and lines
@@ -92,9 +93,7 @@ const
     model_object = {
         "name": "Default",
         "additionalData":{},
-        "global_config":{
-            // TODO: what kind of place holders do we need for config information?
-        },
+        "global_config":{},
         "factors": {
             "tqi": {},
             "quality_aspects": {},
@@ -104,13 +103,18 @@ const
         "diagnostics": {}
     };
 
-let nodeInfo = {
+// For copying current info to compare with new info
+let currentNodeInfo = {
     nodeName : null,
     nodeDesc : null,
     nodeType : "other",
     toolName : null,
-    is_positive : null
+    is_positive : null,
+    config_key: null,
 }
+
+// Current node gets set when the edit node function is called on the selected node
+let currentNode = {};
 
 const App = () => {
     /* References:
@@ -124,12 +128,12 @@ const App = () => {
         nodeDesc = null,
         nodeType = "other",
         toolName = null,
-        is_positive = null;
-
+        is_positive = null,
+        config_key = null;
 
     const
         [interfaces, setInterfaces] = useState([]),
-        [storage, setStorage] = useState([]),
+        [nodes, setNodes] = useState([]),
         [lines, setLines] = useState([]),
         [selected, setSelected] = useState(null),
         [actionState, setActionState] = useState("Normal");
@@ -145,7 +149,7 @@ const App = () => {
 
     // Checks existence of nodes
     const checkExistence = (id) => {
-        return [...storage, ...interfaces].map((b) => b.id).includes(id);
+        return [...nodes, ...interfaces].map((b) => b.id).includes(id);
     };
 
     // Set functions for Node properties
@@ -154,27 +158,50 @@ const App = () => {
     function setType(prop){ nodeType = prop.value; }
     function setTool(prop){ toolName = prop.target.value; }
     function setBool(prop){ is_positive = prop.value; }
+    function setConfigKey(prop){ config_key = prop.value; }
+    // function setConfigValue(prop){ config_value= prop.target.value; }
 
-    // Set functions for node changes
+    /*
+     * For all these change (set) functions, they check the initial value of the selected node
+     * and compare it to the current value coming in, if they are different, then the user provided
+     * changes are written to the standard node fields. If they are not different, then the standard
+     * node fields get set to the initial values of teh selected node.
+     */
     function changeName(prop){
-        if (prop.target.value !== nodeName)
-            nodeInfo.nodeName = prop.target.value;
+        if (prop.target.value !== currentNodeInfo.nodeName)
+            nodeName = prop.target.value;
+        else
+            nodeName = currentNodeInfo.nodeName;
     }
     function changeDesc(prop){
-        if (prop.target.value !== nodeDesc)
-            nodeInfo.nodeDesc = prop.target.value;
+        if (prop.target.value !== currentNodeInfo.nodeDesc)
+            nodeDesc = prop.target.value;
+        else
+            nodeDesc = currentNodeInfo.nodeDesc;
     }
     function changeType(prop){
-        if (prop.value !== nodeInfo)
-            nodeInfo.nodeType = prop.value;
+        if (prop.value !== currentNodeInfo.nodeType)
+            nodeType = prop.value;
+        else
+            nodeType = currentNodeInfo.nodeType;
     }
     function changeTool(prop){
-        if (prop.target.value !== toolName)
-            nodeInfo.toolName = prop.target.value;
+        if (prop.target.value !== currentNodeInfo.toolName)
+            toolName = prop.target.value;
+        else
+            toolName = currentNodeInfo.toolName;
     }
     function changeBool(prop){
-        if (prop.value !== is_positive)
-            nodeInfo.is_positive = prop.value;
+        if (prop.value !== currentNodeInfo.is_positive)
+            is_positive = prop.value;
+        else
+            is_positive = currentNodeInfo.is_positive;
+    }
+    function changeConfigKey(prop){
+        if (prop.value !== currentNodeInfo.config_key)
+            config_key = prop.value;
+        else
+            config_key = currentNodeInfo.config_key;
     }
 
     /**
@@ -184,8 +211,11 @@ const App = () => {
      * @function
      */
     function handleDropDynamic() {
-        let l = storage.length;
-        // TODO: If this can be implemented, it should drop the node on the screen at the location it is dropped.
+        closeForm();
+        let l = nodes.length;
+        /*TODO: Set function to look for event, get the bounding client,
+         * and set x, y coordinates to the bounding rectangle client.
+         */
         // let { x, y } = e.target.getBoundingClientRect();
         let object = TYPE[0];
         while (checkExistence("node" + l)) l++;
@@ -200,16 +230,18 @@ const App = () => {
             children: {},
             positive: is_positive,
             t_name: toolName,
+            c_key: config_key,
             x: 500,
             y: 500,
-            // TODO: The x and y coordinates should be the location where the node is dropped, but it's not working?
+            /*TODO: The x and y coordinates should be mapped to the
+             * place they are dropped on the screen
+             */
             // x: e.clientX - x,
             // y: e.clientY - y,
             shape: object};
-        setStorage([...storage, newNode]);
+        setNodes([...nodes, newNode]);
         storage.push(newNode);
         console.log(storage);
-        closeForm();
     }
 
     /**
@@ -217,33 +249,70 @@ const App = () => {
      * @function
      */
     function showInfo(selected) {
-        openInfo();
-        const index = storage.findIndex(item => {
+        const index = nodes.findIndex(item => {
             return item.id === selected;
         });
         const name = document.getElementById("info-name");
-        name.innerHTML = storage[index].id.toString();
+        if (nodes[index].id != null)
+            name.innerHTML = nodes[index].id.toString();
         const desc = document.getElementById("info-desc");
-        desc.innerHTML = storage[index].desc.toString();
+        if (nodes[index].desc != null)
+            desc.innerHTML = nodes[index].desc.toString();
         const type = document.getElementById("info-type");
-        type.innerHTML = storage[index].type.toString();
+        if (nodes[index].type != null)
+            type.innerHTML = nodes[index].type.toString();
+        const pos = document.getElementById("info-pos");
+        if (nodes[index].positive != null)
+            pos.innerHTML = nodes[index].positive.toString();
+        const tool = document.getElementById("info-tool");
+        if (nodes[index].t_name != null)
+            tool.innerHTML = nodes[index].t_name.toString();
+        const config = document.getElementById("info-config");
+        if (nodes[index].c_key != null)
+            config.innerHTML = nodes[index].c_key.toString();
+        openInfo();
     }
 
     function setEdit(selected) {
-        nodeName = selected.id;
-        nodeDesc = selected.desc;
-        nodeType = selected.type;
-        toolName = selected.t_name;
-        is_positive = selected.positive;
+        let index = nodes.findIndex(element => element.id === selected);
+        currentNode = nodes[index];
+        currentNodeInfo.nodeName = currentNode.id;
+        currentNodeInfo.nodeDesc = currentNode.desc;
+        currentNodeInfo.nodeType = currentNode.type;
+        currentNodeInfo.toolName = currentNode.t_name;
+        currentNodeInfo.is_positive = currentNode.positive;
+        currentNodeInfo.config_key = currentNode.config_key;
+        currentNodeInfo.config_value = currentNode.config_value;
         openEdit();
     }
 
-    function changeNodeInfo() {
-        setChanges(
-
-        )
+    /**
+     * @function
+     * Maps all accepted changes to the currently selected node object. Called in the onClick event of
+     * the HTML element for the edit menu
+     * @param props provided by props const array
+     * @param selected when edit is called (within TopBar.jsx) a copy of the selected item in the
+     * storage array is assigned to a global currentNode object.
+     */
+    function acceptEdit(props, selected) {
         closeEdit();
-        console.log(nodeInfo);
+        props.setNodes((storage) => {
+            if ([...storage, ...props.interfaces].map((a) => a.id).includes(nodeName)) {
+                alert('Name already in use, please choose another!');
+            }
+            else if (nodeName === null) {
+                return;
+            }
+            return storage.map((node) => (node.id === selected.id ? {
+                ...node,
+                id: nodeName,
+                desc: nodeDesc,
+                type: nodeType,
+                t_name : toolName,
+                is_pos : is_positive,
+                c_key: config_key,
+            } : node));
+        });
     }
 
     /**
@@ -312,7 +381,7 @@ const App = () => {
 
     function export_to_JSON(prop) {
         lines.forEach(addChildren);
-        storage.sort((a, b) => (a.type > b.type) ? 1 : -1);
+        nodes.sort((a, b) => (a.type > b.type) ? 1 : -1);
         const data = new Blob([JSON.stringify(model_object)], {type: 'application/json'});
         const a = document.createElement('a');
         a.download = (prop + ".json");
@@ -340,9 +409,56 @@ const App = () => {
         const obj = JSON.parse(JSON.stringify(incoming_json));
         const
             name = obj.name,
+            config = obj.global_config,
             factors = obj.factors,
             measures = obj.measures,
             diagnostics = obj.diagnostics;
+        // handles model name
+        store_node_from_JSON(
+            name,
+            "",
+            "name",
+            null,
+            null,
+            null,
+            null);
+        for (let config_type in config) {
+            switch(config_type) {
+                case "benchmark_strategy":
+                    store_node_from_JSON(
+                        config[config_type],
+                        null,
+                        "global_config",
+                        null,
+                        null,
+                        null,
+                        config_type
+                    )
+                    break;
+                case "normalizer":
+                    store_node_from_JSON(
+                        config[config_type],
+                        null,
+                        "global_config",
+                        null,
+                        null,
+                        null,
+                        config_type
+                    )
+                    break;
+                case "weights_strategy":
+                    store_node_from_JSON(
+                        config[config_type],
+                        null,
+                        "global_config",
+                        null,
+                        null,
+                        null,
+                        config_type
+                    )
+                    break
+            }
+        }
         for (let factor in factors){
             switch(factor) {
                 case "tqi":
@@ -388,14 +504,6 @@ const App = () => {
                     console.log("Key:Value pair not in model.");
             }
         }
-        // handles model name
-        store_node_from_JSON(
-            name,
-            "",
-            "name",
-            null,
-            null,
-            null);
         // measures
         for (let data in measures) {
             store_node_from_JSON(
@@ -429,16 +537,20 @@ const App = () => {
      * @function
      */
     function populate_model() {
-        for (let i = 0; i < storage.length; i++) {
-            let nodeType = storage[i].type,
-                nodeName = storage[i].id,
-                nodeDesc = storage[i].desc,
-                children = storage[i].children,
-                is_positive = storage[i].positive,
-                toolName = storage[i].t_name;
+        for (let i = 0; i < nodes.length; i++) {
+            let nodeType = nodes[i].type,
+                config_key = nodes[i].c_key,
+                nodeName = nodes[i].id,
+                nodeDesc = nodes[i].desc,
+                children = nodes[i].children,
+                is_positive = nodes[i].positive,
+                toolName = nodes[i].t_name;
             switch (nodeType) {
                 case "name":
                     model_object.name = nodeName;
+                    break;
+                case "global_config":
+                    model_object.global_config[config_key] = nodeName;
                     break;
                 case "tqi":
                     model_object.factors.tqi[nodeName] = {};
@@ -475,7 +587,7 @@ const App = () => {
     // variables to remember number of each type of node passed to store_node_from_JSON
     let t, c = 0;
     // Formats incoming JSON into the proper format for viewing on screen
-    function store_node_from_JSON(nodeName, nodeDesc, nodeType, nodeChildren, isPositive, toolName){
+    function store_node_from_JSON(nodeName, nodeDesc, nodeType, nodeChildren, isPositive, toolName, configType){
         let object = TYPE[0],
             nodewidth = nodeName.toString().length,
             xpos, ypos;
@@ -485,20 +597,23 @@ const App = () => {
             case "name":
                 ypos = 90;
                 break;
-            case "tqi":
+            case "global_config":
                 ypos = 180;
                 break;
+            case "tqi":
+                ypos = 270;
+                break;
             case "quality_aspects":
-                ypos = 300;
+                ypos = 360;
                 break;
             case "product_factors":
-                ypos = 420;
+                ypos = 450;
                 break;
             case "measures":
                 ypos = 540;
                 break;
             case "diagnostics":
-                ypos = 660;
+                ypos = 630;
                 break;
             default:
                 console.log("Node has no place in model.");
@@ -513,7 +628,6 @@ const App = () => {
         //xpos = 850 + c*150*(Math.pow(-1, storage.length % 2)); //more centered
         xpos = 250 - nodewidth*3.2 + c*200; //left justified
 
-        // TODO: How to handle global config info?
         //creates the node from load
         let newNode = {
             id: nodeName,
@@ -522,18 +636,17 @@ const App = () => {
             children: nodeChildren,
             positive: isPositive,
             t_name: toolName,
+            c_key: configType,
             x: xpos,
             y: ypos,
             shape: object};
-        setStorage([...storage, newNode]);
-        storage.push(newNode);
+        setNodes([...nodes, newNode]);
+        nodes.push(newNode);
         for (let k in nodeChildren) {
             let p = {props: {start: nodeName, end: k}};
             setLines([...lines, p]);
             childlines.push(p);
         }
-        // console.log(storage);
-        // console.log(childlines);
     }
 
     // Displays info popup
@@ -543,6 +656,18 @@ const App = () => {
     // Hides info popup
     function closeInfo() {
         document.getElementById("info").style.display = "none";
+        const name = document.getElementById("info-name");
+        name.innerHTML = "No Name";
+        const desc = document.getElementById("info-desc");
+        desc.innerHTML = "No Description";
+        const type = document.getElementById("info-type");
+        type.innerHTML = "No Type";
+        const pos = document.getElementById("info-pos");
+        pos.innerHTML = "Invalid";
+        const tool = document.getElementById("info-tool");
+        tool.innerHTML = "No Tool Name";
+        const config = document.getElementById("info-config");
+        config.innerHTML = "No Config Type";
     }
     // Display edit node information popup
     function openEdit() {
@@ -596,8 +721,8 @@ const App = () => {
     const props = {
         interfaces,
         setInterfaces,
-        nodes: storage,
-        setNodes: setStorage,
+        nodes: nodes,
+        setNodes: setNodes,
         selected,
         showInfo,
         setEdit,
@@ -610,8 +735,8 @@ const App = () => {
 
     // Node properties
     const nodeProps = {
-        nodes: storage,
-        setNodes: setStorage,
+        nodes: nodes,
+        setNodes: setNodes,
         selected,
         showInfo,
         setEdit,
@@ -658,7 +783,7 @@ const App = () => {
                         {/* Dropdown Node Options */}
                         <TopBar {...props} />
                         {/* New Node Mapping */}
-                        {storage.map((node, i) => ( <Node
+                        {nodes.map((node, i) => ( <Node
                                 {...nodeProps}
                                 key={i} // this seems to be the way to make sure every child has a unique id in a list
                                 node={node}
@@ -666,47 +791,6 @@ const App = () => {
                                 sidePos="middle"
                             />
                         ))}
-                        {/* Edit node popup menu*/}
-                        <div className="edit-popup" id="edit">
-                            <div className="edit-container" id="display-edit">
-                                <h2>Edit Node Information</h2>
-                                <b>Change Node Name</b>
-                                <input type="text"
-                                       placeholder="Name"
-                                       id="inputName"
-                                       onChange={changeName}/>
-                                <b>Change Description</b>
-                                <input type="text"
-                                       placeholder="Description"
-                                       id="inputDesc"
-                                       onChange={changeDesc}/>
-                                <br/>
-                                <b>Change Classification</b>
-                                <Select id="inputType"
-                                        options={options}
-                                        value={"Other"}
-                                        onChange={changeType} />
-                                <br/>
-                                <b>Change Positive? (for Measures)</b>
-                                <Select id="positiveType"
-                                        options={bool_options}
-                                        value={"Bool"}
-                                        onChange={changeBool} />
-                                <br/>
-                                <b>Change Tool Name (for Diagnostics)</b>
-                                <input type="text"
-                                       placeholder="Name"
-                                       id="toolName"
-                                       onChange={changeTool}/>
-                                {/* Submission Button */}
-                                <Button
-                                    id="submit-btn"
-                                    tooltip="Submit"
-                                    styles={{backgroundColor: "#f65503", color: "#FFFFFF"}}
-                                    onClick={changeNodeInfo}
-                                />
-                            </div>
-                        </div>
                         {/* Add Node Popup Menu */}
                         <div className="form-popup" id="popup">
                             <div className="form-container" id="form">
@@ -741,6 +825,16 @@ const App = () => {
                                        placeholder="Name"
                                        id="toolName"
                                        onChange={setTool}/>
+                                <br/>
+                                <b>Global Config Info</b>
+                                <Select type="configType"
+                                        options={config_options}
+                                        value={"Config"}
+                                        onChange={setConfigKey} />
+                                {/*<input type="text"*/}
+                                {/*       placeholder="Config Value"*/}
+                                {/*       id="configValue"*/}
+                                {/*       onChange={setConfigValue}/>*/}
                                 {/* Submission Button */}
                                 <Button
                                     id="submit-btn"
@@ -750,16 +844,63 @@ const App = () => {
                                 />
                             </div>
                         </div>
+                        {/* Edit node popup menu*/}
+                        <div className="edit-popup" id="edit">
+                            <div className="edit-container" id="display-edit">
+                                <h2>Edit Node Information</h2>
+                                <b>Change Node Name</b>
+                                <input type="text"
+                                       placeholder="Name"
+                                       id="name-change"
+                                       onChange={changeName}/>
+                                <b>Change Description</b>
+                                <input type="text"
+                                       placeholder="Description"
+                                       id="desc-change"
+                                       onChange={changeDesc}/>
+                                <br/>
+                                <b>Change Classification</b>
+                                <Select id="type-change"
+                                        options={options}
+                                        value={"Other"}
+                                        onChange={changeType} />
+                                <br/>
+                                <b>Change Positive? (for Measures)</b>
+                                <Select id="pos-change"
+                                        options={bool_options}
+                                        value={"Bool"}
+                                        onChange={changeBool} />
+                                <br/>
+                                <b>Change Tool Name (for Diagnostics)</b>
+                                <input type="text"
+                                       placeholder="Name"
+                                       id="tool-change"
+                                       onChange={changeTool}/>
+                                {/* Submission Button */}
+                                <Button
+                                    id="submit-btn"
+                                    tooltip="Submit"
+                                    styles={{backgroundColor: "#f65503", color: "#FFFFFF"}}
+                                    onClick={function(){acceptEdit(props, currentNode)}}
+                                />
+                            </div>
+                        </div>
                         {/* Node Information Popup */}
                         <div className="info-popup" id="info">
                             <div className="info-container" id="display-info">
                                 <h2>Current Node Info</h2>
                                 <b>Name</b>
-                                <p className="tab" id="info-name">Name</p>
+                                <p className="tab" id="info-name">No Name</p>
                                 <b>Description</b>
-                                <p className="tab" id="info-desc">Desc</p>
+                                <p className="tab" id="info-desc">No Description</p>
                                 <b>Classification</b>
-                                <p className="tab" id="info-type">Type</p>
+                                <p className="tab" id="info-type">No Type</p>
+                                <b>Positive</b>
+                                <p className="tab" id="info-pos">Invalid</p>
+                                <b>Tool Name</b>
+                                <p className="tab" id="info-tool">No Tool Name</p>
+                                <b>Config Type</b>
+                                <p className="tab" id="info-config">No Config Type</p>
                                 <Button
                                     tooltip="Exit"
                                     styles={{backgroundColor: "red", color: "#FFFFFF"}} onClick={closeInfo}
