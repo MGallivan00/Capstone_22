@@ -422,6 +422,7 @@ const App = () => {
             null,
             null,
             null);
+        // handles config nodes
         for (let config_type in config) {
             switch(config_type) {
                 case "benchmark_strategy":
@@ -456,7 +457,7 @@ const App = () => {
                         null,
                         config_type
                     )
-                    break
+                    break;
             }
         }
         for (let factor in factors){
